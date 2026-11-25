@@ -1,0 +1,12 @@
+{
+"rewrites": [
+{
+"source": "/alfa",
+"destination": "https://alfalearning.sat.co.id/"
+},
+{
+"source": "/alfa/:path*",
+"destination": "https://alfalearning.sat.co.id/:path*"
+}
+]
+}
