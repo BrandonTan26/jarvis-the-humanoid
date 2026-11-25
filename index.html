@@ -423,6 +423,55 @@
         </section>
 
         <!-- ========================================================= -->
+        <!-- MENU 3: KNOWLEDGE DATABASE                                -->
+        <!-- ========================================================= -->
+        <section id="view-database" class="app-view hidden space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Knowledge Database</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Seluruh kisi-kisi aktif yang tersimpan permanen di perangkat & Cloud.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+              <span id="dbStatFiles" class="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-extrabold">6 File</span>
+              <span id="dbStatRecords" class="px-3 py-1.5 rounded-xl bg-violet-50 dark:bg-violet-950/60 text-violet-700 dark:text-violet-300 font-extrabold">25 Soal & Jawaban</span>
+              <button onclick="checkDbConflicts()" class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 font-bold transition">⚠️ Cek Konflik</button>
+            </div>
+          </div>
+
+          <div id="dbConflictBanner" class="hidden p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200"></div>
+
+          <div class="glass-card border rounded-2xl p-3 flex flex-col sm:flex-row gap-2">
+            <input id="dbSearchInput" oninput="debouncedDbSearch()" type="text" placeholder="Cari soal, jawaban, atau nama file..." class="flex-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-violet-500" />
+            <select id="dbFileFilter" onchange="renderDatabaseTable(1)" class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-medium">
+              <option value="ALL">Semua File Sumber</option>
+            </select>
+          </div>
+
+          <div class="glass-card border rounded-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead class="bg-slate-50 dark:bg-slate-900/80 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+                  <tr>
+                    <th class="py-2.5 px-3 w-12">#</th>
+                    <th class="py-2.5 px-3">Pertanyaan</th>
+                    <th class="py-2.5 px-3">Jawaban</th>
+                    <th class="py-2.5 px-3">Sumber File</th>
+                  </tr>
+                </thead>
+                <tbody id="dbTableBody" class="divide-y divide-slate-100 dark:divide-slate-800/80"></tbody>
+              </table>
+            </div>
+            <div class="px-3 py-2.5 bg-slate-50/70 dark:bg-slate-900/60 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2 text-xs">
+              <span id="dbPageInfo" class="text-slate-500">Menampilkan 0 soal</span>
+              <div class="flex gap-1.5">
+                <button onclick="changeDbPage(-1)" class="px-3 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold">Prev</button>
+                <button onclick="changeDbPage(1)" class="px-3 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold">Next</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
         <!-- MENU 4: UPLOAD CENTER                                     -->
         <!-- ========================================================= -->
         <section id="view-upload" class="app-view hidden space-y-4">
@@ -543,16 +592,19 @@
           <div class="glass-card border rounded-2xl p-5 space-y-4">
             <div class="flex items-center justify-between p-3.5 rounded-xl bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800/60">
               <div>
-                <div class="text-xs font-bold text-violet-900 dark:text-violet-200">Aktifkan Tombol & Saran Otomatis "SARAN AI (Gemini)" untuk Soal Unmatched</div>
-                <div class="text-[11px] text-violet-700/80 dark:text-violet-300/70">Hanya menampilkan saran referensi, tombol Auto-Klik tetap terkunci untuk soal Unmatched.</div>
+                <div class="text-xs font-bold text-violet-900 dark:text-violet-200">Auto-Referensi "SARAN AI (Gemini)" Otomatis Saat Jawaban Auto Tidak Ada</div>
+                <div class="text-[11px] text-violet-700/80 dark:text-violet-300/70">Jika soal berstatus 🔴 UNMATCHED, Gemini otomatis menganalisis soal & opsi lalu menampilkan referensi (tetap tidak mengklik otomatis).</div>
               </div>
-              <input id="aiFallbackToggle" type="checkbox" checked onchange="settings.aiFallbackEnabled=this.checked; showToast(this.checked ? '✨ SARAN AI Gemini diaktifkan untuk soal Unmatched' : 'SARAN AI Gemini dinonaktifkan');" class="w-5 h-5 accent-violet-600" />
+              <input id="aiFallbackToggle" type="checkbox" checked onchange="saveAiSettings(); showToast(this.checked ? '✨ Auto-Referensi SARAN AI Gemini AKTIF' : 'Auto-Referensi SARAN AI Gemini dimatikan');" class="w-5 h-5 accent-violet-600" />
             </div>
 
             <div class="space-y-1.5">
-              <label class="text-xs font-bold text-slate-700 dark:text-slate-200">Gemini API Key (Opsional — Biarkan Kosong di Preview / Isi untuk APK Offline)</label>
+              <label class="text-xs font-bold text-slate-700 dark:text-slate-200">Gemini API Key (Opsional — Biarkan Kosong di Preview / Isi & Simpan untuk GitHub/Vercel/HP)</label>
               <div class="flex flex-col sm:flex-row gap-2">
-                <input id="aiApiKeyInput" type="password" placeholder="Kosongkan untuk Auto-Key bawaan, atau tempel AIzaSy... untuk dipakai di APK HP" class="flex-1 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-violet-500" />
+                <input id="aiApiKeyInput" type="password" onchange="saveAiSettings()" placeholder="Kosongkan di Preview, atau tempel AIzaSy... agar jalan permanen di Vercel/HP" class="flex-1 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-violet-500" />
+                <button onclick="saveAiSettings(true)" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shrink-0">
+                  💾 Simpan Key
+                </button>
                 <button id="btnTestGemini" onclick="testGeminiConnection()" class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold transition shrink-0">
                   🧪 Test Gemini API
                 </button>
@@ -857,6 +909,7 @@
 
     let lastLiveResults = [];
     let lastManualResults = [];
+    let lastSameOriginBoxes = [];
     let matchHistory = [];
     let currentDbPage = 1;
     const DB_PAGE_SIZE = 50;
@@ -868,7 +921,7 @@
        3. INDEXEDDB PERMANENT LOCAL STORAGE (CHUNKED 500 RECORDS/TX)
        ========================================================================= */
     const IDB_NAME = 'JarvisHumanoidPermanentV4';
-    const IDB_VERSION = 1;
+    const IDB_VERSION = 2;
     let idbInstance = null;
 
     function openLocalIDB() {
@@ -882,6 +935,9 @@
           }
           if (!db.objectStoreNames.contains('history')) {
             db.createObjectStore('history', { keyPath: 'id' });
+          }
+          if (!db.objectStoreNames.contains('meta')) {
+            db.createObjectStore('meta', { keyPath: 'id' });
           }
         };
         req.onsuccess = (e) => {
@@ -1397,12 +1453,14 @@
       const boxes = Array.from(doc.querySelectorAll('.que'));
       const targets = boxes.length ? boxes : Array.from(doc.querySelectorAll('.formulation'));
       const results = [];
+      lastSameOriginBoxes = [];
       let exact = 0, fuzzy = 0, unmatched = 0;
 
       targets.forEach((box, idx) => {
         const qEl = box.querySelector('.qtext') || box.querySelector('h3, h4, p');
         const qText = (qEl ? qEl.innerText : '').trim();
         if (!qText) return;
+        lastSameOriginBoxes.push(box);
 
         const radios = Array.from(box.querySelectorAll('.answer input[type="radio"], input[type="radio"]'));
         const options = radios.map((inp, i) => {
@@ -1417,7 +1475,7 @@
         });
 
         const m = matchSingleQuestion(qText, options);
-        box.querySelectorAll('.jarvis-dom-badge').forEach(el => el.remove());
+        box.querySelectorAll('.jarvis-dom-badge, .jarvis-ai-ref-badge').forEach(el => el.remove());
 
         const badge = doc.createElement('div');
         badge.className = 'jarvis-dom-badge';
@@ -1453,15 +1511,18 @@
           badge.style.background = '#fef2f2';
           badge.style.color = '#991b1b';
           badge.style.border = '1.5px solid #ef4444';
-          badge.innerHTML = '<span>🔴 JARVIS • UNMATCHED (Belum ada di database — tidak diklik)</span>';
+          badge.innerHTML = settings.aiFallbackEnabled
+            ? '<span>🔴 JARVIS • UNMATCHED (Tidak diklik — ⏳ Meminta referensi AI...)</span>'
+            : '<span>🔴 JARVIS • UNMATCHED (Belum ada di database — tidak diklik)</span>';
         }
 
         const host = box.querySelector('.formulation') || box;
         host.insertBefore(badge, host.firstChild);
 
         results.push({
-          number: idx + 1,
+          number: results.length + 1,
           question: qText,
+          options: options.map(o => o.text).filter(Boolean),
           status: m.matchedOption ? m.status : 'UNMATCHED',
           score: m.score,
           layer: m.layer,
@@ -1479,7 +1540,7 @@
       };
       renderLiveAutoPilotReport(results, summary);
       recordHistorySession('Auto-Pilot', results, summary);
-      showToast(total ? `⚡ Selesai! ${exact + fuzzy}/${total} soal cocok & otomatis diklik.` : 'Belum ada kotak soal (.que) terdeteksi di halaman ini.');
+      showToast(total ? `⚡ Selesai! ${exact + fuzzy}/${total} soal cocok & otomatis diklik.${unmatched && settings.aiFallbackEnabled ? ` Memuat ${unmatched} referensi AI...` : ''}` : 'Belum ada kotak soal (.que) terdeteksi di halaman ini.');
     }
 
     function executeAutoPilotPlay() {
@@ -1629,84 +1690,131 @@
           </div>
         `;
       }).join('');
+
+      // Otomatis cari referensi AI untuk semua soal UNMATCHED jika fitur AI Fallback aktif
+      if (settings.aiFallbackEnabled) {
+        autoFetchAiReferencesForLive(results);
+      }
+    }
+
+    async function autoFetchAiReferencesForLive(results) {
+      const unmatchedIndices = [];
+      results.forEach((r, idx) => {
+        if (!r.answer || r.status === 'UNMATCHED') unmatchedIndices.push(idx);
+      });
+      if (!unmatchedIndices.length) return;
+
+      for (const idx of unmatchedIndices) {
+        await requestAiSuggestionForLive(idx);
+      }
+    }
+
+    function injectAiRefIntoQuizDom(idx, refText) {
+      // 1. Jika Same-Origin (Vercel Proxy /alfa/)
+      const box = lastSameOriginBoxes[idx];
+      if (box && box.ownerDocument) {
+        const doc = box.ownerDocument;
+        box.querySelectorAll('.jarvis-ai-ref-badge').forEach(el => el.remove());
+        const aiDiv = doc.createElement('div');
+        aiDiv.className = 'jarvis-ai-ref-badge';
+        aiDiv.style.cssText = 'padding:8px 12px;margin-bottom:10px;border-radius:10px;background:#f5f3ff;color:#4c1d95;border:1.5px solid #8b5cf6;font-family:sans-serif;font-size:12px;line-height:1.45;white-space:pre-wrap;';
+        aiDiv.textContent = '✨ SARAN AI (Referensi — Tidak Auto-Klik):\n' + refText;
+        const host = box.querySelector('.formulation') || box;
+        const existingBadge = host.querySelector('.jarvis-dom-badge');
+        if (existingBadge && existingBadge.nextSibling) {
+          host.insertBefore(aiDiv, existingBadge.nextSibling);
+        } else {
+          host.insertBefore(aiDiv, host.firstChild);
+        }
+        return;
+      }
+
+      // 2. Jika Cross-Origin Bridge (Tampermonkey Userscript)
+      const iframe = document.getElementById('alfaIframe');
+      if (isBridgeConnected && iframe?.contentWindow) {
+        iframe.contentWindow.postMessage({
+          type: 'JARVIS_INJECT_AI_REF',
+          index: idx,
+          text: refText
+        }, '*');
+      }
     }
 
     function copyLiveItem(idx, type) {
       const r = lastLiveResults[idx];
       if (!r) return;
-      if (type === 'q') copyRawText(r.question, `Teks Soal #${r.number} disalin!`);
-      else if (type === 'a' && r.answer) copyRawText(r.answer, `Jawaban Soal #${r.number} disalin!`);
+      if (type === 'q') copyRawText(r.question || '', '📋 Teks soal disalin!');
+      else if (type === 'a' && r.answer) copyRawText(r.answer, '📋 Jawaban disalin!');
+    }
+
+    function copyManualItem(idx, type) {
+      const r = lastManualResults[idx];
+      if (!r) return;
+      if (type === 'q') copyRawText(r.question || '', '📋 Teks soal disalin!');
+      else if (type === 'a' && r.answer) copyRawText(r.answer, '📋 Jawaban disalin!');
     }
 
     /* =========================================================================
-       7. KNOWLEDGE DATABASE TABLE, SEARCH, FILTER & CONFLICT CHECKER
+       7. STATS UI & KNOWLEDGE DATABASE TABLE
        ========================================================================= */
     function updateAllStatsUI() {
-      const total = activeDB.length;
       const fileCounts = new Map();
       for (const r of activeDB) {
-        const fname = r.file || 'Unknown';
-        fileCounts.set(fname, (fileCounts.get(fname) || 0) + 1);
+        const fn = r.file || 'Unknown';
+        fileCounts.set(fn, (fileCounts.get(fn) || 0) + 1);
       }
       const totalFiles = fileCounts.size;
-      const totalFmt = total.toLocaleString('id-ID');
+      const totalRecs = activeDB.length;
 
-      const headerFileCnt = document.getElementById('headerFileCount');
-      const headerCnt = document.getElementById('headerRecordCount');
-      const sbFile = document.getElementById('sidebarFileCount');
-      const sbRec = document.getElementById('sidebarRecordCount');
-      const dbFile = document.getElementById('dbStatFiles');
-      const dbRec = document.getElementById('dbStatRecords');
-      const upPill = document.getElementById('uploadSummaryPill');
-      const kpiRec = document.getElementById('kpiTotalRecords');
-      const kpiFile = document.getElementById('kpiTotalFiles');
+      const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      setTxt('sidebarFileCount', `${totalFiles.toLocaleString('id-ID')} File`);
+      setTxt('sidebarRecordCount', `${totalRecs.toLocaleString('id-ID')} Soal`);
+      setTxt('headerFileCount', totalFiles.toLocaleString('id-ID'));
+      setTxt('headerRecordCount', totalRecs.toLocaleString('id-ID'));
+      setTxt('kpiTotalRecords', totalRecs.toLocaleString('id-ID'));
+      setTxt('kpiTotalFiles', totalFiles.toLocaleString('id-ID'));
+      setTxt('dbStatFiles', `${totalFiles.toLocaleString('id-ID')} File`);
+      setTxt('dbStatRecords', `${totalRecs.toLocaleString('id-ID')} Soal & Jawaban`);
+      setTxt('uploadSummaryPill', `${totalFiles.toLocaleString('id-ID')} File • ${totalRecs.toLocaleString('id-ID')} Soal & Jawaban`);
 
-      if (headerFileCnt) headerFileCnt.textContent = totalFiles.toLocaleString('id-ID');
-      if (headerCnt) headerCnt.textContent = totalFmt;
-      if (sbFile) sbFile.textContent = `${totalFiles.toLocaleString('id-ID')} File`;
-      if (sbRec) sbRec.textContent = `${totalFmt} Soal`;
-      if (dbFile) dbFile.textContent = `${totalFiles.toLocaleString('id-ID')} File`;
-      if (dbRec) dbRec.textContent = `${totalFmt} Soal & Jawaban`;
-      if (upPill) upPill.textContent = `${totalFiles.toLocaleString('id-ID')} File • ${totalFmt} Soal & Jawaban`;
-      if (kpiRec) kpiRec.textContent = totalFmt;
-      if (kpiFile) kpiFile.textContent = totalFiles.toLocaleString('id-ID');
+      let totalExact = 0, totalUnmatched = 0;
+      for (const h of matchHistory) {
+        totalExact += (h.summary?.exact || 0);
+        totalUnmatched += (h.summary?.unmatched || 0);
+      }
+      setTxt('kpiExactMatches', totalExact.toLocaleString('id-ID'));
+      setTxt('kpiUnmatched', totalUnmatched.toLocaleString('id-ID'));
 
-      const filesListEl = document.getElementById('uploadedFilesSummaryList');
-      if (filesListEl) {
-        filesListEl.innerHTML = Array.from(fileCounts.entries())
-          .sort((a, b) => b[1] - a[1])
-          .map(([fname, cnt]) => `
-            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200/70 dark:border-slate-800 flex items-center justify-between gap-2">
-              <span class="font-semibold text-slate-700 dark:text-slate-200 truncate" title="${escapeHtml(fname)}">📄 ${escapeHtml(fname)}</span>
-              <span class="px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/60 text-violet-700 dark:text-violet-300 font-extrabold text-[10px] shrink-0">${cnt.toLocaleString('id-ID')} soal</span>
+      const recentEl = document.getElementById('homeRecentActivities');
+      if (recentEl) {
+        if (matchHistory.length) {
+          recentEl.innerHTML = matchHistory.slice(0, 5).map(h => `
+            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+              <span class="truncate font-semibold text-slate-700 dark:text-slate-200">${escapeHtml(h.preview || h.type)}</span>
+              <span class="text-emerald-600 dark:text-emerald-400 font-bold shrink-0">${h.summary?.exact || 0}/${h.summary?.total || 0} Exact</span>
             </div>
           `).join('');
+        } else {
+          recentEl.innerHTML = '<div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">Belum ada sesi Auto-Pilot atau Match Engine. Buka menu <strong>2. MINI BROWSER & AUTO-PILOT</strong> untuk mulai!</div>';
+        }
       }
 
-      const exactTot = matchHistory.reduce((acc, h) => acc + (h.summary?.exact || 0), 0);
-      const unmTot = matchHistory.reduce((acc, h) => acc + (h.summary?.unmatched || 0), 0);
-      const kpiEx = document.getElementById('kpiExactMatches');
-      const kpiUn = document.getElementById('kpiUnmatched');
-      if (kpiEx) kpiEx.textContent = exactTot.toLocaleString('id-ID');
-      if (kpiUn) kpiUn.textContent = unmTot.toLocaleString('id-ID');
-
-      const sel = document.getElementById('dbFileFilter');
-      if (sel) {
-        const prev = sel.value || 'ALL';
-        sel.innerHTML = '<option value="ALL">Semua File Sumber (' + totalFiles + ')</option>' +
-          Array.from(fileCounts.keys()).sort().map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)} (${fileCounts.get(f)})</option>`).join('');
-        if (fileCounts.has(prev)) sel.value = prev;
+      const fileSel = document.getElementById('dbFileFilter');
+      if (fileSel) {
+        const prev = fileSel.value || 'ALL';
+        const sortedFiles = Array.from(fileCounts.keys()).sort();
+        fileSel.innerHTML = '<option value="ALL">Semua File Sumber</option>' +
+          sortedFiles.map(fn => `<option value="${escapeHtml(fn)}">${escapeHtml(fn)} (${fileCounts.get(fn).toLocaleString('id-ID')})</option>`).join('');
+        if (sortedFiles.includes(prev)) fileSel.value = prev;
       }
 
-      const recent = document.getElementById('homeRecentActivities');
-      if (recent && matchHistory.length) {
-        recent.innerHTML = matchHistory.slice(0, 5).map(h => `
-          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
-            <div class="min-w-0">
-              <div class="font-bold text-slate-800 dark:text-slate-200 truncate">${escapeHtml(h.type)} • ${h.summary.total} Soal</div>
-              <div class="text-[11px] text-slate-400">${escapeHtml(h.timeStr)}</div>
-            </div>
-            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 shrink-0">${h.summary.coverage}% Match</span>
+      const upList = document.getElementById('uploadedFilesSummaryList');
+      if (upList) {
+        const entries = Array.from(fileCounts.entries()).sort((a, b) => b[1] - a[1]);
+        upList.innerHTML = entries.map(([fn, cnt]) => `
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200/70 dark:border-slate-800 flex items-center justify-between gap-2">
+            <span class="font-bold text-slate-700 dark:text-slate-200 truncate" title="${escapeHtml(fn)}">📄 ${escapeHtml(fn)}</span>
+            <span class="px-2 py-0.5 rounded-lg bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 font-extrabold shrink-0">${cnt.toLocaleString('id-ID')} soal</span>
           </div>
         `).join('');
       }
@@ -2100,100 +2208,103 @@
           </div>
         `;
       }).join('');
-    }
 
-    function copyManualItem(idx, type) {
-      const r = lastManualResults[idx];
-      if (!r) return;
-      if (type === 'q') copyRawText(r.question, `Teks Soal #${r.number} disalin!`);
-      else if (type === 'a' && r.answer) copyRawText(r.answer, `Jawaban Soal #${r.number} disalin!`);
+      if (settings.aiFallbackEnabled) {
+        results.forEach((r, idx) => {
+          if (!r.answer || r.status === 'UNMATCHED') {
+            requestAiSuggestionForManual(idx);
+          }
+        });
+      }
     }
 
     /* =========================================================================
        9B. GEMINI AI BRAIN ENGINE (gemini-3-flash-preview + EXPONENTIAL BACKOFF)
        ========================================================================= */
+    async function saveAiSettings(notify = false) {
+      const keyVal = (document.getElementById('aiApiKeyInput')?.value || '').trim();
+      const enabledVal = Boolean(document.getElementById('aiFallbackToggle')?.checked);
+      settings.aiFallbackEnabled = enabledVal;
+      await idbPutChunked('meta', [{ id: 'ai_settings', apiKey: keyVal, enabled: enabledVal }], 10);
+      if (notify) showToast(keyVal ? '💾 Gemini API Key tersimpan permanen di perangkat!' : '💾 Pengaturan AI disimpan (Mode Auto-Key).');
+    }
+
+    async function loadAiSettings() {
+      const items = await idbGetAll('meta');
+      const aiCfg = items.find(x => x.id === 'ai_settings');
+      if (aiCfg) {
+        const keyInput = document.getElementById('aiApiKeyInput');
+        const toggle = document.getElementById('aiFallbackToggle');
+        if (keyInput && typeof aiCfg.apiKey === 'string') keyInput.value = aiCfg.apiKey;
+        if (typeof aiCfg.enabled === 'boolean') {
+          settings.aiFallbackEnabled = aiCfg.enabled;
+          if (toggle) toggle.checked = aiCfg.enabled;
+        }
+      }
+    }
+
     async function callGeminiApi(userQuery, systemPrompt = '') {
       const customKey = (document.getElementById('aiApiKeyInput')?.value || '').trim();
-      const apiKey = customKey || "";
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${encodeURIComponent(apiKey)}`;
-
+      const apiKey = customKey || '';
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${encodeURIComponent(apiKey)}`;
       const payload = {
-        contents: [{ parts: [{ text: userQuery }] }]
+        contents: [{ parts: [{ text: userQuery }] }],
+        ...(systemPrompt ? { systemInstruction: { parts: [{ text: systemPrompt }] } } : {})
       };
-      if (systemPrompt) {
-        payload.systemInstruction = { parts: [{ text: systemPrompt }] };
-      }
 
-      const maxRetries = 5;
-      let delayMs = 1000;
-
-      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      const delays = [1000, 2000, 4000];
+      let lastErr = null;
+      for (let attempt = 0; attempt <= delays.length; attempt++) {
         try {
-          const response = await fetch(apiUrl, {
+          const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
-
-          if (!response.ok) {
-            if ((response.status === 429 || response.status >= 500) && attempt < maxRetries) {
-              await new Promise(r => setTimeout(r, delayMs));
-              delayMs *= 2;
-              continue;
-            }
-            const errJson = await response.json().catch(() => ({}));
-            throw new Error(errJson?.error?.message || `HTTP ${response.status}`);
+          if (!res.ok) {
+            const errBody = await res.text().catch(() => '');
+            throw new Error(`HTTP ${res.status}${errBody ? ': ' + errBody.slice(0, 140) : ''}`);
           }
-
-          const result = await response.json();
-          const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (!text) throw new Error('Respon Gemini kosong.');
+          const data = await res.json();
+          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!text) throw new Error('Respons Gemini kosong.');
           return text.trim();
         } catch (err) {
-          if (attempt < maxRetries && (err.name === 'TypeError' || String(err.message).includes('429'))) {
-            await new Promise(r => setTimeout(r, delayMs));
-            delayMs *= 2;
-            continue;
+          lastErr = err;
+          if (attempt < delays.length) {
+            await new Promise(r => setTimeout(r, delays[attempt]));
           }
-          throw err;
         }
       }
-      throw new Error('Gagal menghubungi Gemini API setelah beberapa percobaan.');
+      throw lastErr || new Error('Gagal terhubung ke Gemini API.');
     }
 
     async function testGeminiConnection() {
       const btn = document.getElementById('btnTestGemini');
       const box = document.getElementById('aiTestResultBox');
       const badge = document.getElementById('aiConnectionBadge');
-      btn.disabled = true;
-      btn.textContent = '⏳ Menghubungkan...';
-      box.className = 'p-3 rounded-xl text-xs font-medium bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300';
-      box.textContent = 'Mengirim ping ke Gemini 3 Flash...';
-      box.classList.remove('hidden');
-
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ Menguji...'; }
+      if (box) {
+        box.classList.remove('hidden');
+        box.className = 'p-3 rounded-xl text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300';
+        box.textContent = '⏳ Menghubungi Gemini 3 Flash...';
+      }
       try {
-        const reply = await callGeminiApi(
-          'Balas singkat dalam 1 kalimat Bahasa Indonesia: konfirmasi bahwa JARVIS AI Brain terhubung dengan Gemini 3 Flash.',
-          'Kamu adalah JARVIS THE HUMANOID AI Brain.'
-        );
-        box.className = 'p-3 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300';
-        box.textContent = '✅ Terhubung! ' + reply;
-        if (badge) {
-          badge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300';
-          badge.textContent = '🟢 Gemini 3 Flash Connected';
+        const reply = await callGeminiApi('Balas tepat dengan: "Koneksi Gemini 3 Flash JARVIS AKTIF!"', 'Jawab singkat.');
+        if (box) {
+          box.className = 'p-3 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300';
+          box.textContent = '✅ Berhasil Terhubung: ' + reply;
         }
+        if (badge) badge.textContent = '🟢 Gemini 3 Flash Online';
         showToast('✅ Koneksi Gemini API berhasil!');
       } catch (err) {
-        box.className = 'p-3 rounded-xl text-xs font-semibold bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300';
-        box.textContent = '❌ Gagal terhubung: ' + err.message;
-        if (badge) {
-          badge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300';
-          badge.textContent = '🔴 Cek API Key / Koneksi';
+        if (box) {
+          box.className = 'p-3 rounded-xl text-xs font-bold bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300';
+          box.textContent = '❌ Gagal terhubung: ' + err.message;
         }
-        showToast('Gagal tes Gemini API: ' + err.message);
+        if (badge) badge.textContent = '🟠 Perlu API Key';
       } finally {
-        btn.disabled = false;
-        btn.textContent = '🧪 Test Gemini API';
+        if (btn) { btn.disabled = false; btn.textContent = '🧪 Test Gemini API'; }
       }
     }
 
@@ -2230,13 +2341,17 @@
       box.classList.remove('hidden');
       box.textContent = '⏳ Meminta SARAN AI (Gemini 3 Flash)...';
       try {
+        const optsBlock = (r.options && r.options.length)
+          ? `\nPilihan jawaban:\n${r.options.map((o, i) => `${String.fromCharCode(65 + i)}. ${o}`).join('\n')}\nPilih 1 jawaban paling tepat dari pilihan di atas beserta alasan singkat (maks 2 kalimat).`
+          : '\nBerikan jawaban paling tepat secara singkat dan jelas (maks 2 kalimat).';
         const reply = await callGeminiApi(
-          `Soal kuis: "${r.question}"\nBerikan jawaban paling tepat secara singkat dan jelas (1-2 kalimat).`,
-          'Kamu adalah asisten ritel Alfamart. Jawab ringkas, akurat, dan sertakan label bahwa ini saran referensi.'
+          `Soal kuis: "${r.question}"${optsBlock}`,
+          'Kamu adalah asisten operasional ritel Alfamart. Jawab sangat ringkas, langsung sebutkan jawaban paling tepat, dan 1 kalimat alasan.'
         );
         box.textContent = '✨ SARAN AI (Referensi — Bukan Kunci DB & Tidak Auto-Klik):\n' + reply;
+        injectAiRefIntoQuizDom(idx, reply);
       } catch (err) {
-        box.textContent = '❌ Gagal meminta SARAN AI: ' + err.message;
+        box.textContent = '❌ Gagal meminta SARAN AI: ' + err.message + ' (Pastikan Gemini API Key sudah diisi di menu 6. AI BRAIN jika diakses di Vercel/HP).';
       }
     }
 
@@ -2248,30 +2363,30 @@
       box.textContent = '⏳ Meminta SARAN AI (Gemini 3 Flash)...';
       try {
         const reply = await callGeminiApi(
-          `Soal kuis: "${r.question}"\nBerikan jawaban paling tepat secara singkat dan jelas (1-2 kalimat).`,
-          'Kamu adalah asisten ritel Alfamart. Jawab ringkas, akurat, dan sertakan label bahwa ini saran referensi.'
+          `Soal kuis: "${r.question}"\nBerikan jawaban paling tepat secara singkat dan jelas (maks 2 kalimat).`,
+          'Kamu adalah asisten operasional ritel Alfamart. Jawab ringkas, akurat, dan jelas.'
         );
         box.textContent = '✨ SARAN AI (Referensi — Bukan Kunci DB):\n' + reply;
       } catch (err) {
-        box.textContent = '❌ Gagal meminta SARAN AI: ' + err.message;
+        box.textContent = '❌ Gagal meminta SARAN AI: ' + err.message + ' (Isi Gemini API Key di menu 6. AI BRAIN jika diakses di Vercel/HP).';
       }
     }
 
     /* =========================================================================
-       10. HISTORY, DATABASE MANAGER & DIRECT DOWNLOAD HTML APK BUILDER
+       10. MATCH HISTORY & DATABASE MANAGER
        ========================================================================= */
-    function recordHistorySession(type, results, summary) {
+    async function recordHistorySession(type, results, summary) {
       const entry = {
-        id: `hist_${Date.now().toString(36)}`,
+        id: `hist_${Date.now()}`,
         type,
         timeStr: new Date().toLocaleString('id-ID'),
-        preview: results[0]?.question?.slice(0, 120) || 'Sesi Analisis',
-        summary
+        preview: results?.[0]?.question ? results[0].question.slice(0, 110) : `${type} (${summary?.total || 0} soal)`,
+        summary: summary || { total: 0, exact: 0, fuzzy: 0, unmatched: 0 }
       };
-      matchHistory.unshift(entry);
-      if (matchHistory.length > 100) matchHistory = matchHistory.slice(0, 100);
-      idbPutChunked('history', [entry], 50);
+      matchHistory = [entry, ...matchHistory].slice(0, 100);
+      await idbPutChunked('history', [entry], 50);
       updateAllStatsUI();
+      if (activeTabId === 'history') renderHistoryView();
     }
 
     function renderHistoryView() {
@@ -2352,7 +2467,7 @@
       await idbClear('records');
       await idbPutChunked('records', activeDB, 500);
       renderDatabaseTable(1);
-      showToast(`🧹 Deduplikasi selesai! ${before - activeDB.length} duplikat dihapus.`);
+      showToast(`🧹 Deduplicate selesai: ${before - unique.length} soal ganda dihapus.`);
     }
 
     async function resetLocalDatabase() {
@@ -2361,29 +2476,8 @@
       rebuildFastIndex();
       await idbPutChunked('records', activeDB, 500);
       renderDatabaseTable(1);
-      showToast('Cache lokal direset ke 25 soal seed.');
-      if (typeof window.syncCloudNow === 'function') window.syncCloudNow(false);
-    }
-
-    function downloadOfflineApkHtml() {
-      try {
-        const cleanDb = activeDB.map(({ q, a, file, sheet, row }) => ({ q, a, file, sheet, row }));
-        const safeJson = JSON.stringify(cleanDb).replace(/<\/script>/gi, '<\\/script>');
-        let htmlDoc = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-        const markerRe = /<script id="jarvis-embedded-db" type="application\/json">[\s\S]*?<\/script>/i;
-        htmlDoc = htmlDoc.replace(
-          markerRe,
-          `<script id="jarvis-embedded-db" type="application/json">${safeJson}<\/script>`
-        );
-        const blob = new Blob([htmlDoc], { type: 'text/html;charset=utf-8' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'JARVIS_THE_HUMANOID_OFFLINE_APK.html';
-        a.click();
-        showToast(`📱 Berhasil mengunduh HTML Siap APK (${cleanDb.length} soal tertanam)!`);
-      } catch (e) {
-        showToast('Gagal mengunduh HTML APK: ' + e.message);
-      }
+      await syncCloudNow(false);
+      showToast('🗑️ Cache lokal dibersihkan & dimuat ulang.');
     }
 
     function triggerPwaInstall() {
@@ -2526,7 +2620,8 @@
       const host = box.querySelector('.formulation') || box;
       host.insertBefore(badge, host.firstChild);
       results.push({
-        number: idx + 1, question: qText, status: m.matchedOption ? m.status : 'UNMATCHED',
+        number: idx + 1, question: qText, options: options.map(o => o.text).filter(Boolean),
+        status: m.matchedOption ? m.status : 'UNMATCHED',
         score: m.score, layer: m.layer, answer: m.record ? m.record.a : null,
         clickedOption: m.matchedOption ? m.matchedOption.text : null,
         source: m.record ? (m.record.file + ' • Baris ' + (m.record.row || '-')) : null
@@ -2550,6 +2645,22 @@
       if (d.threshold) cfg.threshold = d.threshold;
       if (typeof d.delayMs === 'number') cfg.delayMs = d.delayMs;
       executeQuizAutoPilot(cachedDb);
+    }
+    if (d.type === 'JARVIS_INJECT_AI_REF' && typeof d.index === 'number' && d.text) {
+      const boxes = Array.from(document.querySelectorAll('.que'));
+      const targets = boxes.length ? boxes : Array.from(document.querySelectorAll('.formulation'));
+      const box = targets[d.index];
+      if (box) {
+        box.querySelectorAll('.jarvis-ai-ref-badge').forEach(el => el.remove());
+        const aiDiv = document.createElement('div');
+        aiDiv.className = 'jarvis-ai-ref-badge';
+        aiDiv.style.cssText = 'padding:8px 12px;margin-bottom:10px;border-radius:10px;background:#f5f3ff;color:#4c1d95;border:1.5px solid #8b5cf6;font-family:sans-serif;font-size:12px;line-height:1.45;white-space:pre-wrap;';
+        aiDiv.textContent = '✨ SARAN AI (Referensi — Tidak Auto-Klik):\\n' + d.text;
+        const host = box.querySelector('.formulation') || box;
+        const badge = host.querySelector('.jarvis-bridge-badge');
+        if (badge && badge.nextSibling) host.insertBefore(aiDiv, badge.nextSibling);
+        else host.insertBefore(aiDiv, host.firstChild);
+      }
     }
     if (d.type === 'JARVIS_COPY_QUESTIONS') {
       const qs = Array.from(document.querySelectorAll('.que .qtext, .formulation .qtext'))
@@ -2784,6 +2895,7 @@ class MainActivity : AppCompatActivity() {
 
       const localRecs = await idbGetAll('records');
       const localHist = await idbGetAll('history');
+      await loadAiSettings();
       matchHistory = localHist.sort((a, b) => (b.id || '').localeCompare(a.id || ''));
 
       const merged = [];
