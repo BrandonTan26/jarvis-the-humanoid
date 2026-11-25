@@ -428,7 +428,7 @@
         <section id="view-upload" class="app-view hidden space-y-4">
           <div>
             <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Upload Center — Unlimited MB & Live Stream Extract</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Tanpa batas ukuran MB! Mendukung multi-file <strong>.xlsx, .xls, .csv, .json, .pdf, .docx, .txt</strong>. Otomatis menolak <strong>file duplikat (nama / isi sama dengan file lain)</strong>, langsung ekstrak & tersimpan permanen.</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Tanpa batas ukuran MB! Mendukung multi-file <strong>.xlsx, .xls, .csv, .json, .pdf, .docx, .txt</strong>. Otomatis menolak <strong>nama file yang sama / duplikat</strong> (seluruh soal & jawaban di dalam file yang lolos tetap masuk semua).</p>
           </div>
 
           <!-- Drag & Drop Zone -->
@@ -438,7 +438,7 @@
             </div>
             <div>
               <div class="text-sm font-extrabold text-slate-900 dark:text-white">Klik atau Tarik Banyak File Sekaligus (Unlimited MB)</div>
-              <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Excel (.xlsx/.xls), JSON (.json), CSV, PDF, DOCX, TXT • File dengan isi sama otomatis ditolak</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Excel (.xlsx/.xls), JSON (.json), CSV, PDF, DOCX, TXT • Nama file yang sama otomatis ditolak 1</div>
             </div>
             <input id="fileUploadInput" type="file" multiple accept=".xlsx,.xls,.csv,.json,.pdf,.docx,.txt" class="hidden" onchange="handleFileUpload(this.files)" />
           </div>
@@ -465,8 +465,8 @@
                 <div id="upStatAdded" class="text-base font-extrabold text-emerald-600 dark:text-emerald-400">0</div>
               </div>
               <div class="p-2.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-900">
-                <div class="text-[10px] font-semibold text-amber-700 dark:text-amber-400">File / Item Duplikat Ditolak</div>
-                <div id="upStatDup" class="text-base font-extrabold text-amber-600 dark:text-amber-400">0</div>
+                <div class="text-[10px] font-semibold text-amber-700 dark:text-amber-400">Nama File Duplikat Ditolak</div>
+                <div id="upStatDup" class="text-base font-extrabold text-amber-600 dark:text-amber-400">0 file</div>
               </div>
               <div class="p-2.5 rounded-xl bg-violet-50/70 dark:bg-violet-950/40 border border-violet-200/70 dark:border-violet-900">
                 <div class="text-[10px] font-semibold text-violet-700 dark:text-violet-400">Kecepatan Ekstrak</div>
@@ -1883,19 +1883,39 @@
       feed.innerHTML = '';
 
       let totalAdded = 0;
-      let totalDup = 0;
       let totalDupFiles = 0;
+      let totalAcceptedFiles = 0;
       let totalProcessed = 0;
       const startTime = performance.now();
       const allNewlyAdded = [];
+
+      // Hanya cek duplikat berdasarkan NAMA FILE (yang sudah ada di DB maupun sesama file dalam 1 batch upload)
       const existingFileNames = new Set(activeDB.map(r => (r.file || '').toLowerCase().trim()));
 
       document.getElementById('upStatFiles').textContent = `0 / ${files.length}`;
       document.getElementById('upStatAdded').textContent = '0';
-      document.getElementById('upStatDup').textContent = '0';
+      document.getElementById('upStatDup').textContent = '0 file';
 
       for (let fi = 0; fi < files.length; fi++) {
         const file = files[fi];
+        const normFileName = file.name.toLowerCase().trim();
+        lbl.textContent = `Memeriksa (${fi + 1}/${files.length}): ${file.name}`;
+
+        // Tolak jika nama file sudah pernah masuk atau kembar dalam batch upload ini
+        if (existingFileNames.has(normFileName)) {
+          totalDupFiles++;
+          appendFeedLine(`[⊘ FILE DUPLIKAT DITOLAK] Nama file "${file.name}" sudah ada / sama — 1 file ditolak!`, 'text-rose-400');
+          document.getElementById('upStatDup').textContent = `${totalDupFiles} file`;
+          document.getElementById('upStatFiles').textContent = `${fi + 1} / ${files.length}`;
+          const filePct = Math.round(((fi + 1) / files.length) * 100);
+          bar.style.width = `${filePct}%`;
+          pctEl.textContent = `${filePct}%`;
+          continue;
+        }
+
+        // Tandai nama file ini sudah diterima agar jika ada file ke-2 bernama sama di batch ini langsung ditolak
+        existingFileNames.add(normFileName);
+        totalAcceptedFiles++;
         lbl.textContent = `Membaca (${fi + 1}/${files.length}): ${file.name}`;
         appendFeedLine(`📂 Membuka file: ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)...`, 'text-sky-400');
 
@@ -1907,79 +1927,37 @@
             continue;
           }
 
-          // CEK DUPLIKAT LEVEL FILE (apakah isi file 100% sama dengan file lain yang sudah ada di DB)
-          let validCount = 0;
-          let dupCountInFile = 0;
-          const matchedSourceFiles = new Map();
-          for (const row of rows) {
-            const nq = normalizeText(row.q);
-            const na = normalizeText(row.a);
-            if (!nq || !na) continue;
-            validCount++;
-            const key = `${nq}||${na}`;
-            if (dedupKeySet.has(key)) {
-              dupCountInFile++;
-              const srcFile = keyToFileMap.get(key) || 'Database';
-              matchedSourceFiles.set(srcFile, (matchedSourceFiles.get(srcFile) || 0) + 1);
-            }
-          }
-
-          if (validCount > 0 && dupCountInFile === validCount) {
-            totalDupFiles++;
-            totalDup += dupCountInFile;
-            const topMatchedFile = Array.from(matchedSourceFiles.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] || 'file sebelumnya';
-            appendFeedLine(`[⊘ FILE DUPLIKAT DITOLAK] "${file.name}" isinya 100% sama dengan "${topMatchedFile}" (${validCount} soal) — file ditolak!`, 'text-rose-400');
-            document.getElementById('upStatDup').textContent = `${totalDupFiles} file (${totalDup.toLocaleString('id-ID')} item)`;
-            document.getElementById('upStatFiles').textContent = `${fi + 1} / ${files.length}`;
-            const filePct = Math.round(((fi + 1) / files.length) * 100);
-            bar.style.width = `${filePct}%`;
-            pctEl.textContent = `${filePct}%`;
-            continue;
-          }
-
-          if (existingFileNames.has(file.name.toLowerCase().trim()) && dupCountInFile > 0) {
-            appendFeedLine(`ℹ️ Nama file "${file.name}" sudah ada — hanya menambahkan ${validCount - dupCountInFile} soal baru & menolak ${dupCountInFile} duplikat.`, 'text-amber-300');
-          } else {
-            appendFeedLine(`🔍 Ditemukan ${validCount.toLocaleString('id-ID')} soal di "${file.name}" (${dupCountInFile} duplikat dengan file lain akan dilewati).`, 'text-violet-300');
-          }
+          appendFeedLine(`🔍 Ditemukan ${rows.length.toLocaleString('id-ID')} soal di "${file.name}" — semua soal & jawaban langsung dimasukkan!`, 'text-violet-300');
 
           const CHUNK = 250;
           for (let i = 0; i < rows.length; i += CHUNK) {
             const slice = rows.slice(i, i + CHUNK);
             let sampleAdded = null;
-            let sampleDup = null;
 
             for (const row of slice) {
               totalProcessed++;
               const nq = normalizeText(row.q);
               const na = normalizeText(row.a);
               if (!nq || !na) continue;
-              const key = `${nq}||${na}`;
-              if (dedupKeySet.has(key)) {
-                totalDup++;
-                if (!sampleDup) sampleDup = row.q.slice(0, 65);
-              } else {
-                dedupKeySet.add(key);
-                keyToFileMap.set(key, row.file || file.name);
-                const rec = {
-                  id: `rec_${Date.now().toString(36)}_${totalAdded}_${Math.random().toString(36).slice(2, 6)}`,
-                  q: row.q,
-                  a: row.a,
-                  file: row.file,
-                  sheet: row.sheet,
-                  row: row.row,
-                  _nq: nq,
-                  _na: na
-                };
-                activeDB.push(rec);
-                allNewlyAdded.push(rec);
-                totalAdded++;
-                if (!sampleAdded) sampleAdded = `${row.q.slice(0, 55)} → ${row.a.slice(0, 30)}`;
-              }
+
+              // Semua soal & jawaban dari file yang lolos langsung masuk tanpa ditolak
+              const rec = {
+                id: `rec_${Date.now().toString(36)}_${fi}_${totalAdded}_${Math.random().toString(36).slice(2, 6)}`,
+                q: row.q,
+                a: row.a,
+                file: file.name,
+                sheet: row.sheet,
+                row: row.row,
+                _nq: nq,
+                _na: na
+              };
+              activeDB.push(rec);
+              allNewlyAdded.push(rec);
+              totalAdded++;
+              if (!sampleAdded) sampleAdded = `${row.q.slice(0, 55)} → ${row.a.slice(0, 30)}`;
             }
 
             if (sampleAdded) appendFeedLine(`[+ MASUK] ${sampleAdded}`, 'text-emerald-400');
-            if (sampleDup) appendFeedLine(`[⊘ ITEM DUPLIKAT DILEWATI] ${sampleDup}`, 'text-amber-400');
 
             const elapsedSec = Math.max(0.05, (performance.now() - startTime) / 1000);
             const speed = Math.round(totalProcessed / elapsedSec);
@@ -1988,14 +1966,13 @@
             bar.style.width = `${filePct}%`;
             pctEl.textContent = `${filePct}%`;
             document.getElementById('upStatAdded').textContent = totalAdded.toLocaleString('id-ID');
-            document.getElementById('upStatDup').textContent = totalDupFiles ? `${totalDupFiles} file (${totalDup.toLocaleString('id-ID')} item)` : totalDup.toLocaleString('id-ID');
+            document.getElementById('upStatDup').textContent = `${totalDupFiles} file`;
             document.getElementById('upStatSpeed').textContent = `${speed.toLocaleString('id-ID')} / dtk`;
             detail.textContent = `${totalProcessed.toLocaleString('id-ID')} baris dipindai`;
 
             // Yield to UI thread so browser never freezes
             await new Promise(r => setTimeout(r, 0));
           }
-          existingFileNames.add(file.name.toLowerCase().trim());
         } catch (err) {
           appendFeedLine(`❌ Gagal memproses ${file.name}: ${err.message}`, 'text-rose-400');
         }
@@ -2018,12 +1995,12 @@
       bar.style.width = '100%';
       pctEl.textContent = '100%';
       lbl.textContent = totalDupFiles && !totalAdded
-        ? `⊘ ${totalDupFiles} file ditolak karena isinya 100% sama dengan file yang sudah ada!`
-        : `✅ Selesai! +${totalAdded.toLocaleString('id-ID')} soal baru masuk (${totalDupFiles} file duplikat ditolak).`;
+        ? `⊘ ${totalDupFiles} file ditolak karena nama filenya sudah ada / duplikat!`
+        : `✅ Selesai! ${totalAcceptedFiles} file masuk (+${totalAdded.toLocaleString('id-ID')} soal), ${totalDupFiles} file nama duplikat ditolak.`;
       appendFeedLine(`🎉 LIVE PERMANENT! Total database aktif sekarang: ${activeDB.length.toLocaleString('id-ID')} soal.`, 'text-emerald-300');
       showToast(totalDupFiles && !totalAdded
-        ? `⊘ ${totalDupFiles} file duplikat ditolak (isi sama persis dengan file lain)!`
-        : `✅ +${totalAdded} soal masuk permanen! (${totalDupFiles} file duplikat ditolak)`);
+        ? `⊘ ${totalDupFiles} file ditolak (nama file sama)!`
+        : `✅ ${totalAcceptedFiles} file masuk (+${totalAdded} soal), ${totalDupFiles} file duplikat ditolak!`);
       const inp = document.getElementById('fileUploadInput');
       if (inp) inp.value = '';
     }
@@ -2689,12 +2666,13 @@ class MainActivity : AppCompatActivity() {
 
     window.mergeCloudRecords = async function(cloudRecords) {
       if (!Array.isArray(cloudRecords) || !cloudRecords.length) return;
+      const existingIds = new Set(activeDB.map(r => r.id));
       const added = [];
       for (const r of cloudRecords) {
-        const k = makeRecordKey(r.q, r.a);
-        if (!dedupKeySet.has(k)) {
-          dedupKeySet.add(k);
-          const rec = { ...r, id: r.id || `cld_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}` };
+        const rid = r.id || `cld_${(r.file || 'db').toLowerCase()}_${r.row || 0}_${normalizeText(r.q).slice(0, 24)}`;
+        if (!existingIds.has(rid)) {
+          existingIds.add(rid);
+          const rec = { ...r, id: rid };
           activeDB.push(rec);
           added.push(rec);
         }
@@ -2809,12 +2787,12 @@ class MainActivity : AppCompatActivity() {
       matchHistory = localHist.sort((a, b) => (b.id || '').localeCompare(a.id || ''));
 
       const merged = [];
-      const seen = new Set();
+      const seenIds = new Set();
       for (const r of [...baseSeed, ...embedded, ...localRecs]) {
-        const k = makeRecordKey(r.q, r.a);
-        if (r.q && r.a && !seen.has(k)) {
-          seen.add(k);
-          merged.push(r);
+        const rid = r.id || `loc_${(r.file || 'db').toLowerCase()}_${r.row || 0}_${normalizeText(r.q).slice(0, 24)}`;
+        if (r.q && r.a && !seenIds.has(rid)) {
+          seenIds.add(rid);
+          merged.push({ ...r, id: rid });
         }
       }
       activeDB = merged;
