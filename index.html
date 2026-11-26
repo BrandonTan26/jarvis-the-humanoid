@@ -1882,4 +1882,1888 @@
     });
   </script>
 </body>
+</html>CTYPE html>
+<html lang="id" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#6366f1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="JARVIS" />
+  <title>JARVIS THE HUMANOID — Autonomous Quiz & Knowledge Engine</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Multi-Format Document Parsers -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" defer></script>
+
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+    .glass-card { background: rgba(255,255,255,0.92); backdrop-filter: blur(14px); border-color: rgba(226,232,240,0.9); }
+    html.dark .glass-card { background: rgba(15,23,42,0.86); border-color: rgba(99,102,241,0.22); }
+    .btn-violet { background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%); box-shadow: 0 8px 20px -4px rgba(109,40,217,0.45); }
+    .btn-violet:hover { filter: brightness(1.07); }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; animation: fadeIn 0.18s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.45); border-radius: 9999px; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 dark:bg-[#050a18] text-slate-900 dark:text-slate-100 antialiased">
+
+  <div class="min-h-screen flex flex-col lg:flex-row">
+
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="hidden lg:flex lg:flex-col lg:w-64 shrink-0 border-r border-slate-200 dark:border-indigo-500/20 bg-white dark:bg-[#0b1328] sticky top-0 h-screen z-30">
+      <div class="p-4 border-b border-slate-200 dark:border-indigo-500/20 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl btn-violet flex items-center justify-center text-white shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <div class="min-w-0">
+          <div class="font-display font-extrabold text-sm truncate">JARVIS HUMANOID</div>
+          <div id="sidebarDbSummary" class="text-[11px] font-bold text-violet-600 dark:text-indigo-300 truncate">6 File • 25 Soal</div>
+        </div>
+      </div>
+      <nav id="desktopSidebarNav" class="flex-1 overflow-y-auto p-2.5 space-y-1"></nav>
+      <div class="p-3 border-t border-slate-200 dark:border-indigo-500/20 text-[11px] flex items-center justify-between text-slate-500 dark:text-slate-400">
+        <span>Status DB</span>
+        <span id="sidebarSyncStatus" class="font-bold text-emerald-600 dark:text-emerald-400">💾 Permanent</span>
+      </div>
+    </aside>
+
+    <!-- MOBILE DRAWER -->
+    <div id="mobileDrawerBackdrop" onclick="closeMobileDrawer()" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 hidden"></div>
+    <aside id="mobileDrawer" class="fixed top-0 left-0 bottom-0 w-72 max-w-[85vw] bg-white dark:bg-[#0b1328] border-r border-slate-200 dark:border-indigo-500/20 z-50 transform -translate-x-full transition-transform duration-200 flex flex-col">
+      <div class="p-4 border-b border-slate-200 dark:border-indigo-500/20 flex items-center justify-between">
+        <div class="font-display font-extrabold text-sm">⚡ JARVIS HUMANOID</div>
+        <button onclick="closeMobileDrawer()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">✕</button>
+      </div>
+      <nav id="mobileSidebarNav" class="flex-1 overflow-y-auto p-3 space-y-1"></nav>
+    </aside>
+
+    <!-- MAIN COLUMN -->
+    <div class="flex-1 flex flex-col min-w-0">
+
+      <!-- TOP HEADER -->
+      <header class="sticky top-0 z-20 bg-white/90 dark:bg-[#050a18]/90 backdrop-blur-xl border-b border-slate-200 dark:border-indigo-500/20 px-3 sm:px-5 py-2.5">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <button onclick="openMobileDrawer()" class="lg:hidden p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <div class="min-w-0">
+              <div class="font-display font-extrabold text-xs sm:text-sm truncate">JARVIS THE HUMANOID</div>
+              <div id="headerDbBadge" class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 truncate">💾 6 File Masuk • 25 Soal & Jawaban</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button id="headerBridgePill" onclick="openSetupModal()" class="px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 hover:brightness-95 transition">
+              ⚙️ Setup Auto-Klik
+            </button>
+            <button onclick="toggleDarkMode()" title="Mode Gelap / Terang" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-sm">
+              <span class="dark:hidden">🌙</span><span class="hidden dark:inline">☀️</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENT AREA -->
+      <main class="flex-1 p-3 sm:p-5 max-w-7xl w-full mx-auto pb-20">
+
+        <!-- ========================================================= -->
+        <!-- MENU 1: HOME DASHBOARD                                    -->
+        <!-- ========================================================= -->
+        <section id="tab-home" class="tab-pane space-y-4">
+          <div class="rounded-3xl btn-violet p-5 sm:p-6 text-white space-y-2">
+            <div class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-100">AUTONOMOUS QUIZ & KNOWLEDGE ENGINE</div>
+            <h1 class="font-display font-extrabold text-xl sm:text-2xl">JARVIS THE HUMANOID</h1>
+            <p class="text-xs sm:text-sm text-indigo-100 max-w-2xl">Auto-ekstrak soal kuis AlfaLearning, auto-klik pilihan ganda terverifikasi, tolak file duplikat otomatis, dan saran AI Gemini khusus soal yang belum ada di database.</p>
+            <div class="pt-2 flex flex-wrap gap-2">
+              <button onclick="switchTab('browser')" class="px-4 py-2 rounded-xl bg-white text-violet-700 font-extrabold text-xs">🌐 Buka Mini Browser</button>
+              <button onclick="switchTab('upload')" class="px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs">📤 Upload Modul Kisi-Kisi</button>
+              <button onclick="switchTab('match')" class="px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs">🎯 Match Engine Manual</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="glass-card border rounded-2xl p-4"><div class="text-[11px] text-slate-500">Total File / Modul</div><div id="statFiles" class="font-display font-extrabold text-2xl mt-1">0</div></div>
+            <div class="glass-card border rounded-2xl p-4"><div class="text-[11px] text-slate-500">Total Soal & Jawaban</div><div id="statRecords" class="font-display font-extrabold text-2xl text-violet-600 dark:text-indigo-400 mt-1">0</div></div>
+            <div class="glass-card border rounded-2xl p-4"><div class="text-[11px] text-slate-500">Total Exact Match</div><div id="statExact" class="font-display font-extrabold text-2xl text-emerald-600 mt-1">0</div></div>
+            <div class="glass-card border rounded-2xl p-4"><div class="text-[11px] text-slate-500">Total Unmatched</div><div id="statUnmatched" class="font-display font-extrabold text-2xl text-rose-500 mt-1">0</div></div>
+          </div>
+
+          <!-- Modul Kisi-Kisi Aktif -->
+          <div class="glass-card border rounded-2xl p-4 sm:p-5 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 class="text-sm font-extrabold">📚 Modul Kisi-Kisi Aktif di Database</h3>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">Klik modul mana saja untuk langsung melihat daftar soalnya.</p>
+              </div>
+              <button onclick="switchTab('upload')" class="text-xs font-bold text-violet-600 dark:text-indigo-400 hover:underline">Kelola / Upload Modul →</button>
+            </div>
+            <div id="homeModuleBadges" class="flex flex-wrap gap-2"></div>
+          </div>
+
+          <!-- Aktivitas Terbaru -->
+          <div class="glass-card border rounded-2xl p-4 sm:p-5 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-extrabold">Aktivitas Terbaru</h3>
+              <button onclick="switchTab('history')" class="text-xs font-bold text-violet-600 dark:text-indigo-400">Lihat Semua</button>
+            </div>
+            <div id="homeRecentActivities" class="space-y-2 text-xs text-slate-500">Belum ada sesi Auto-Pilot atau Match Engine.</div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- MENU 2: MINI BROWSER & AUTO-PILOT (DEFAULT ACTIVE TAB)    -->
+        <!-- ========================================================= -->
+        <section id="tab-browser" class="tab-pane active space-y-3">
+
+          <!-- Toolbar Auto-Pilot -->
+          <div class="glass-card border rounded-2xl p-2.5 sm:p-3 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="triggerAutoPilotPlay()" class="btn-violet text-white px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5">
+                ▶ PLAY AUTO-PILOT
+              </button>
+              <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 cursor-pointer text-[11px] font-bold">
+                <input id="autoRunSwitch" type="checkbox" checked onchange="saveSettingsState()" class="w-4 h-4 accent-violet-600" />
+                <span>AUTO-RUN KUIS</span>
+              </label>
+              <span id="bridgeStatusText" class="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300">
+                🟠 Mode Proxy / Bridge
+              </span>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <div class="inline-flex rounded-xl bg-slate-100 dark:bg-slate-800 p-0.5 text-[11px] font-bold">
+                <button id="btnModeDirect" onclick="setBrowserMode('direct')" class="px-2.5 py-1.5 rounded-lg transition">Live Direct</button>
+                <button id="btnModeProxy" onclick="setBrowserMode('proxy')" class="px-2.5 py-1.5 rounded-lg transition">Vercel Proxy</button>
+              </div>
+              <button onclick="toggleBrowserFullscreen()" title="Fullscreen" class="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold">⛶</button>
+            </div>
+          </div>
+
+          <!-- Mini Browser Frame -->
+          <div id="miniBrowserContainer" class="glass-card border rounded-2xl overflow-hidden flex flex-col">
+            <div class="p-2 bg-slate-100/80 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-1.5">
+              <button onclick="browserNav('back')" class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 text-xs font-bold">◀</button>
+              <button onclick="browserNav('reload')" class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 text-xs font-bold">↻</button>
+              <button onclick="browserNav('home')" class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 text-xs font-bold">🏠</button>
+              <form onsubmit="event.preventDefault(); browserGoUrl();" class="flex-1 min-w-[160px] flex gap-1.5">
+                <input id="browserUrlInput" type="text" value="https://alfalearning.sat.co.id/" class="flex-1 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-xs" />
+                <button type="submit" class="px-3 py-1.5 rounded-lg bg-violet-600 text-white text-xs font-bold">Go</button>
+              </form>
+              <button onclick="openBrowserNewTab()" class="px-2.5 py-1.5 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs font-bold">Tab Baru ↗</button>
+            </div>
+
+            <iframe id="alfaIframe" src="https://alfalearning.sat.co.id/" class="w-full h-[72vh] bg-white border-0" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation-by-user-activation"></iframe>
+
+            <!-- Sticky Action Bar di Bawah Mini Browser -->
+            <div class="p-2.5 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-2">
+              <div class="flex flex-wrap items-center gap-2">
+                <button onclick="triggerAutoPilotPlay()" class="btn-violet px-3.5 py-2 rounded-xl text-xs font-extrabold">▶ PLAY AUTO-PILOT</button>
+                <button onclick="copyAllQuizQuestions()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold">📋 Copy Teks Soal</button>
+                <button onclick="copyAllQuizAnswers()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold">📋 Copy Jawaban</button>
+              </div>
+              <span class="text-[11px] text-slate-400">Auto-Referensi AI aktif untuk soal UNMATCHED</span>
+            </div>
+          </div>
+
+          <!-- LIVE AUTO-PILOT REPORT -->
+          <div id="liveReportCard" class="hidden glass-card border rounded-2xl p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <div class="text-[11px] font-extrabold text-violet-600 dark:text-indigo-400 uppercase">LIVE AUTO-PILOT REPORT</div>
+                <div id="liveReportSummary" class="text-sm font-extrabold">0 Soal Dianalisis</div>
+              </div>
+              <div class="flex flex-wrap gap-1.5 text-[11px] font-extrabold">
+                <span id="liveStatExact" class="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300">0 Exact</span>
+                <span id="liveStatFuzzy" class="px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300">0 Fuzzy</span>
+                <span id="liveStatUnmatched" class="px-2.5 py-1 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300">0 Unmatched</span>
+              </div>
+            </div>
+            <div id="liveReportList" class="space-y-2.5"></div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- MENU 3: KNOWLEDGE DATABASE                                -->
+        <!-- ========================================================= -->
+        <section id="tab-database" class="tab-pane space-y-3">
+          <div class="glass-card border rounded-2xl p-4 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 class="font-display font-extrabold text-base">📚 KNOWLEDGE DATABASE</h2>
+              <p id="dbHeaderSub" class="text-xs text-slate-500">Total 0 File • 0 Soal & Jawaban</p>
+            </div>
+            <button onclick="switchTab('upload')" class="btn-violet text-white px-3.5 py-2 rounded-xl text-xs font-bold">+ Upload Modul</button>
+          </div>
+
+          <!-- Filter Cepat Per Modul -->
+          <div class="glass-card border rounded-2xl p-3 space-y-2">
+            <div class="text-[11px] font-bold text-slate-500">📂 Filter Cepat Berdasarkan Modul Terupload:</div>
+            <div id="dbModuleChips" class="flex flex-wrap gap-1.5"></div>
+          </div>
+
+          <div class="glass-card border rounded-2xl p-3 flex flex-col sm:flex-row gap-2">
+            <input id="dbSearchInput" oninput="debouncedDbSearch()" type="text" placeholder="Cari teks soal, jawaban, atau nama file..." class="flex-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs" />
+            <select id="dbFileFilter" onchange="onDbFileFilterChange()" class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+              <option value="ALL">Semua Modul / File</option>
+            </select>
+          </div>
+
+          <div id="dbListContainer" class="space-y-2"></div>
+          <div id="dbPaginationBar" class="flex items-center justify-between text-xs text-slate-500 pt-1"></div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- MENU 4: UPLOAD CENTER (UNLIMITED MB + MODUL CHECKLIST)    -->
+        <!-- ========================================================= -->
+        <section id="tab-upload" class="tab-pane space-y-4">
+          <div class="glass-card border rounded-2xl p-4 sm:p-5 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h2 class="font-display font-extrabold text-base">📤 UPLOAD CENTER (Unlimited MB • Streaming Cepat)</h2>
+                <p class="text-xs text-slate-500">Upload banyak file Excel/CSV/JSON/PDF/DOCX/TXT sekaligus. File dengan nama yang sama otomatis ditolak sebagai duplikat; semua soal & jawaban di dalam file yang lolos langsung masuk & tersimpan permanen.</p>
+              </div>
+              <span id="uploadSummaryPill" class="px-3 py-1 rounded-full text-xs font-extrabold bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300">6 File • 25 Soal</span>
+            </div>
+
+            <div id="uploadDropzone" onclick="document.getElementById('fileUploadInput').click()" class="border-2 border-dashed border-violet-300 dark:border-indigo-500/40 rounded-2xl p-7 text-center bg-violet-50/40 dark:bg-slate-900/60 hover:bg-violet-50 dark:hover:bg-slate-900 cursor-pointer transition">
+              <input id="fileUploadInput" type="file" multiple accept=".xlsx,.xls,.csv,.json,.pdf,.docx,.txt" class="hidden" onchange="handleBatchUpload(this.files); this.value='';" />
+              <div class="text-3xl mb-2">📂</div>
+              <div class="font-display font-extrabold text-sm">Klik atau Tarik Banyak File Modul ke Sini</div>
+              <div class="text-xs text-slate-500 mt-1">Mendukung .xlsx, .xls, .csv, .json, .pdf, .docx, .txt — tanpa batas MB</div>
+            </div>
+
+            <!-- Live Progress & Ticker -->
+            <div id="uploadProgressCard" class="hidden rounded-2xl bg-slate-950 text-slate-100 p-4 space-y-2.5 border border-indigo-500/30">
+              <div class="flex items-center justify-between text-xs font-bold">
+                <span id="uploadProgressLabel">Memproses...</span>
+                <span id="uploadProgressPct" class="text-emerald-400">0%</span>
+              </div>
+              <div class="w-full h-2.5 rounded-full bg-slate-800 overflow-hidden">
+                <div id="uploadProgressBar" class="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-150" style="width:0%"></div>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+                <div class="bg-slate-900 rounded-xl p-2"><span class="text-slate-400">File:</span> <strong id="upStatFiles">0/0</strong></div>
+                <div class="bg-slate-900 rounded-xl p-2"><span class="text-slate-400">Soal Masuk:</span> <strong id="upStatAdded" class="text-emerald-400">0</strong></div>
+                <div class="bg-slate-900 rounded-xl p-2"><span class="text-slate-400">File Duplikat:</span> <strong id="upStatDup" class="text-amber-400">0 file</strong></div>
+                <div class="bg-slate-900 rounded-xl p-2"><span class="text-slate-400">Kecepatan:</span> <strong id="upStatSpeed" class="text-sky-400">0 / dtk</strong></div>
+              </div>
+              <div id="liveExtractionFeed" class="h-32 overflow-y-auto rounded-xl bg-black/60 p-2.5 font-mono text-[11px] space-y-1"></div>
+            </div>
+          </div>
+
+          <!-- Daftar Modul & File Aktif -->
+          <div class="glass-card border rounded-2xl p-4 sm:p-5 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 class="text-sm font-extrabold">📂 Daftar Modul & File Aktif di Database</h3>
+                <p class="text-[11px] text-slate-500">Tersimpan permanen di perangkat ini. Upload file dengan nama sama lagi akan otomatis ditolak.</p>
+              </div>
+              <button onclick="savePermanentLocalNow()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">💾 Save Permanent Lokal</button>
+            </div>
+            <div id="uploadedFilesSummaryList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs"></div>
+          </div>
+
+          <!-- Checklist 10 Modul Target -->
+          <div class="glass-card border border-amber-200 dark:border-amber-800/60 rounded-2xl p-4 sm:p-5 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 class="text-sm font-extrabold text-amber-800 dark:text-amber-300">📋 Checklist 10 Modul Kisi-Kisi Kamu</h3>
+                <p class="text-[11px] text-slate-500">Begitu kamu upload ke-10 file Excel kamu di atas, statusnya otomatis berubah jadi <strong>✅ SUDAH MASUK</strong>.</p>
+              </div>
+              <span id="pendingModulesBadge" class="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-800">0 / 10 Masuk</span>
+            </div>
+            <div id="pendingModulesList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs"></div>
+          </div>
+
+          <!-- Save Permanent Lintas Device (GitHub Repo Auto-Load) -->
+          <div class="glass-card border border-indigo-200 dark:border-indigo-800/60 rounded-2xl p-4 sm:p-5 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 class="text-sm font-extrabold text-indigo-800 dark:text-indigo-300">☁️ Save Permanent Lintas Semua Device (HP & PC Tetap Ada)</h3>
+                <p class="text-[11px] text-slate-500">Simpan seluruh database ke <code>JARVIS_MASTER_DB.json</code> di repo GitHub kamu agar otomatis termuat saat dibuka di HP atau PC manapun.</p>
+              </div>
+              <button onclick="exportMasterDbForGithub()" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold">💾 Export JARVIS_MASTER_DB.json</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <input id="ghRepoInput" type="text" value="BrandonTan26/jarvis-the-humanoid" onchange="saveGithubSyncConfig()" placeholder="username/repo" class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs" />
+              <input id="ghTokenInput" type="password" onchange="saveGithubSyncConfig()" placeholder="GitHub Token (ghp_... / github_pat_...)" class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs" />
+              <button id="btnPushGithubDb" onclick="pushMasterDbToGithub()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold">☁️ Push Permanent ke GitHub</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- MENU 5: JARVIS MATCH ENGINE (MANUAL PASTE)                -->
+        <!-- ========================================================= -->
+        <section id="tab-match" class="tab-pane space-y-4">
+          <div class="glass-card border rounded-2xl p-4 sm:p-5 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h2 class="font-display font-extrabold text-base">🎯 JARVIS MATCH ENGINE (Manual Paste)</h2>
+              <div class="flex gap-1.5">
+                <button onclick="pasteManualQuestion()" class="px-3 py-1.5 rounded-xl bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 text-xs font-bold">📋 Paste</button>
+                <button onclick="clearManualMatch()" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold">Clear</button>
+              </div>
+            </div>
+            <textarea id="manualMatchInput" rows="5" placeholder="Tempel 1 soal atau banyak soal bernomor beserta pilihan gandanya (A-E)..." class="w-full rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"></textarea>
+            <button onclick="runManualMatch()" class="w-full btn-violet text-white py-3 rounded-xl font-display font-extrabold text-sm">🔍 Cari Jawaban di Database + Auto AI Fallback</button>
+          </div>
+          <div id="manualMatchResults" class="space-y-3"></div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- MENU 6: AI BRAIN (GEMINI API)                             -->
+        <!-- ========================================================= -->
+        <section id="tab-ai" class="tab-pane space-y-4">
+          <div class="glass-card border rounded-2xl p-4 sm:p-5 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h2 class="font-display font-extrabold text-base">🧠 AI BRAIN — GEMINI AUTO-REFERENSI</h2>
+                <p class="text-xs text-slate-500">Otomatis memberi <strong>✨ SARAN AI</strong> jika soal tidak ditemukan di database (UNMATCHED), tanpa pernah mengklik radio button otomatis.</p>
+              </div>
+              <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold cursor-pointer">
+                <input id="aiAutoSuggestToggle" type="checkbox" checked onchange="saveAiSettings()" class="w-4 h-4 accent-violet-600" />
+                <span>Auto-Saran AI (Unmatched)</span>
+              </label>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <input id="geminiApiKeyInput" type="password" placeholder="Tempel Gemini API Key (AIzaSy...)" class="sm:col-span-2 px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-mono" />
+              <div class="flex gap-2">
+                <button onclick="saveAiSettings(true)" class="flex-1 px-3 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold">💾 Simpan Key</button>
+                <button onclick="testGeminiConnection()" class="flex-1 px-3 py-2.5 rounded-xl btn-violet text-white text-xs font-extrabold">🧪 Test API</button>
+              </div>
+            </div>
+            <div id="aiStatusBanner" class="text-xs p-3 rounded-xl bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300">Status: Siap digunakan. Tempel API Key Gemini lalu klik Simpan Key.</div>
+
+            <div class="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+              <div class="text-xs font-bold">💬 Uji Coba Tanya JARVIS AI Brain</div>
+              <div class="flex gap-2">
+                <input id="aiTestPromptInput" type="text" placeholder="Ketik contoh soal kuis untuk uji respons Gemini..." class="flex-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs" />
+                <button onclick="runAiChatTest()" class="px-4 py-2 rounded-xl btn-violet text-white text-xs font-bold">Kirim</button>
+              </div>
+              <div id="aiTestResponseBox" class="hidden p-3.5 rounded-xl bg-violet-50 dark:bg-indigo-950/50 border border-violet-200 dark:border-indigo-700 text-xs whitespace-pre-wrap leading-relaxed"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- MENU 7: MATCH HISTORY                                     -->
+        <!-- ========================================================= -->
+        <section id="tab-history" class="tab-pane space-y-3">
+          <div class="glass-card border rounded-2xl p-4 flex items-center justify-between">
+            <h2 class="font-display font-extrabold text-base">🕒 MATCH HISTORY</h2>
+            <button onclick="clearHistoryAll()" class="px-3 py-1.5 rounded-xl bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 text-xs font-bold">Hapus Riwayat</button>
+          </div>
+          <div id="historyListContainer" class="space-y-2"></div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- MENU 8: DATABASE MANAGER                                  -->
+        <!-- ========================================================= -->
+        <section id="tab-manager" class="tab-pane space-y-4">
+          <div class="glass-card border rounded-2xl p-4 sm:p-5 space-y-3">
+            <h2 class="font-display font-extrabold text-base">🗄️ DATABASE MANAGER</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <button onclick="savePermanentLocalNow()" class="p-4 rounded-2xl border border-emerald-300 dark:border-emerald-800 text-left space-y-1 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30">
+                <div class="font-extrabold text-sm text-emerald-700 dark:text-emerald-400">💾 Paksa Simpan Lokal</div>
+                <div class="text-xs text-slate-500">Tulis ulang seluruh database aktif ke IndexedDB permanen.</div>
+              </button>
+              <button onclick="exportMasterDbForGithub()" class="p-4 rounded-2xl border border-indigo-300 dark:border-indigo-800 text-left space-y-1 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30">
+                <div class="font-extrabold text-sm text-indigo-700 dark:text-indigo-400">📦 Export Master JSON</div>
+                <div class="text-xs text-slate-500">Cadangkan seluruh soal ke file JARVIS_MASTER_DB.json.</div>
+              </button>
+              <button onclick="confirmResetDatabase()" class="p-4 rounded-2xl border border-rose-300 dark:border-rose-800 text-left space-y-1 hover:bg-rose-50/50 dark:hover:bg-rose-950/30">
+                <div class="font-extrabold text-sm text-rose-600 dark:text-rose-400">🗑️ Reset ke 25 Seed Awal</div>
+                <div class="text-xs text-slate-500">Bersihkan modul tambahan dan kembalikan database awal.</div>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- MENU 9: SETTINGS                                          -->
+        <!-- ========================================================= -->
+        <section id="tab-settings" class="tab-pane space-y-4">
+          <div class="glass-card border rounded-2xl p-4 sm:p-5 space-y-4">
+            <h2 class="font-display font-extrabold text-base">⚙️ SETTINGS</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+                <div class="font-bold">Ambang Batas Fuzzy Match (%)</div>
+                <input id="settingFuzzyThreshold" type="number" min="40" max="95" value="72" onchange="saveSettingsState()" class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 font-bold" />
+              </div>
+              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+                <div class="font-bold">Delay Auto-Klik per Soal (ms)</div>
+                <input id="settingClickDelay" type="number" min="0" max="1000" value="120" onchange="saveSettingsState()" class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 font-bold" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- SETUP MODAL (VERCEL PROXY + USERSCRIPT v4) -->
+  <div id="setupModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 backdrop-blur-sm p-3">
+    <div class="glass-card border rounded-3xl w-full max-w-2xl max-h-[88vh] flex flex-col overflow-hidden shadow-2xl">
+      <div class="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div class="font-display font-extrabold text-sm">⚙️ Setup Auto-Klik (HP & PC)</div>
+        <button onclick="closeSetupModal()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">✕</button>
+      </div>
+      <div class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs">
+        <div class="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-extrabold text-emerald-800 dark:text-emerald-300">1. Cara Tanpa Install di HP & PC (Vercel Proxy)</span>
+            <button onclick="copyElementText('setupVercelCode')" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-bold">Copy vercel.json</button>
+          </div>
+          <p class="text-slate-600 dark:text-slate-300">Taruh file <code>vercel.json</code> sejajar dengan <code>index.html</code> di GitHub lalu aktifkan tombol <strong>Vercel Proxy</strong> di toolbar Mini Browser.</p>
+          <pre id="setupVercelCode" class="p-2.5 rounded-xl bg-slate-950 text-emerald-300 font-mono text-[11px] overflow-x-auto"></pre>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-violet-50 dark:bg-indigo-950/40 border border-violet-200 dark:border-indigo-800 space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-extrabold text-violet-800 dark:text-indigo-300">2. Cara Live Direct (Tampermonkey Userscript v4)</span>
+            <button onclick="copyElementText('setupUserscriptCode')" class="px-2.5 py-1 rounded-lg bg-violet-600 text-white font-bold">Copy Userscript</button>
+          </div>
+          <p class="text-slate-600 dark:text-slate-300">Pasang 1x di Tampermonkey (Chrome/Edge PC atau Kiwi/Lemur Android). Aktifkan <em>Allow User Scripts</em> di Detail ekstensi.</p>
+          <pre id="setupUserscriptCode" class="p-2.5 rounded-xl bg-slate-950 text-indigo-300 font-mono text-[10px] max-h-44 overflow-auto"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIRM MODAL (NO alert/confirm) -->
+  <div id="confirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4">
+    <div class="glass-card border rounded-2xl w-full max-w-sm p-5 space-y-3 shadow-2xl">
+      <div id="confirmModalTitle" class="font-display font-extrabold text-sm">Konfirmasi</div>
+      <div id="confirmModalMsg" class="text-xs text-slate-600 dark:text-slate-300"></div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeConfirmModal()" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold">Batal</button>
+        <button onclick="executeConfirmModal()" class="px-3.5 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold">Ya, Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toastBox" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] pointer-events-none space-y-1.5"></div>
+
+  <script>
+    /* =========================================================================
+       1. SEED DATABASE (25 SOAL ALFAMART FT) & 10 MODUL TARGET CHECKLIST
+       ========================================================================= */
+    const SEED_RECORDS = [
+      { id: "s1", q: "Berikut ini adalah aktivitas serah terima yang dilakukan oleh antar pejabat toko, pada shift 2 yaitu….", a: "Serah terima stock opname item rawan hilang + pokok + susu kaleng", file: "2. DAILY ACTIVITY.xlsx", sheet: "Sheet1", row: 2 },
+      { id: "s2", q: "Pengecekan suhu chiller dan freezer pada aktivitas harian toko wajib dicatat pada form checklist suhu setiap…", a: "Setiap shift (Shift 1, Shift 2, dan Shift 3)", file: "2. DAILY ACTIVITY.xlsx", sheet: "Sheet1", row: 14 },
+      { id: "s3", q: "Setiap shift pagi, Tino (seorang pejabat toko) selalu melakukan proses pagi, salah satu yang harus dicetak adalah update master toko. Dimana seharusnya dokumen tersebut diarsip ?", a: "Ordner 9", file: "ADMINISTRASI PERSONIL TOKO.xlsx", sheet: "Administrasi", row: 2 },
+      { id: "s4", q: "LPB BKL diarsip pada odner nomor...", a: "2", file: "ADMINISTRASI PERSONIL TOKO.xlsx", sheet: "Administrasi", row: 3 },
+      { id: "s5", q: "Form SO susu kaleng dan form SO rokok terdapat pada….", a: "Map Acco 2", file: "ADMINISTRASI PERSONIL TOKO.xlsx", sheet: "Administrasi", row: 4 },
+      { id: "s6", q: "Dokumen bukti penerimaan barang dari Warehouse (WH) yang dicetak saat proses LPB selesai diarsip pada ordner…", a: "Ordner 1", file: "ADMINISTRASI PERSONIL TOKO.xlsx", sheet: "Administrasi", row: 6 },
+      { id: "s7", q: "Saat melakukan transaksi E-Trans di aplikasi POS, hal utama yang wajib dikonfirmasi ulang kepada konsumen sebelum menekan tombol bayar adalah…", a: "Nomor tujuan, nama pelanggan, dan nominal transaksi", file: "ADMINISTRASI PERSONIL TOKO.xlsx", sheet: "POS", row: 5 },
+      { id: "s8", q: "Tindakan yang harus dilakukan kasir jika terjadi kesalahan input item sebelum struk tercetak pada aplikasi POS adalah…", a: "Melakukan Void Item dengan otorisasi pejabat toko", file: "ADMINISTRASI PERSONIL TOKO.xlsx", sheet: "POS", row: 9 },
+      { id: "s9", q: "Aplikasi internal toko yang digunakan untuk pelaporan mutasi aset, komplain operasional, dan tiket perbaikan sarana toko adalah…", a: "APPS / AHO Online", file: "ADMINISTRASI PERSONIL TOKO.xlsx", sheet: "APPS", row: 3 },
+      { id: "s10", q: "Pagi ini toko Alfamart Jababeka baru saja buka, dan produk-produk Beanspot IHB baru saja matang. Tindakan apa yang harus dilakukan oleh personil toko tersebut pada saat kondisi seperti itu…", a: "Menawarkan produk-produk Beanspot", file: "BEANSPOT-1.xlsx", sheet: "Sheet1", row: 2 },
+      { id: "s11", q: "Level roasting biji kopi yang digunakan alfamart yaitu level...", a: "Medium – Dark", file: "BEANSPOT-1.xlsx", sheet: "Sheet1", row: 3 },
+      { id: "s12", q: "Standar suhu penyajian minuman kopi panas Beanspot agar cita rasa tetap optimal berada pada kisaran…", a: "85°C – 92°C", file: "BEANSPOT-1.xlsx", sheet: "Sheet2", row: 6 },
+      { id: "s13", q: "Dokumen yang harus dipersiapkan oleh personil toko jika terdapat barang yang lebih dari quantity pada faktur PO, atau barang yang tidak ada pada faktur PO adalah", a: "Surat Jalan Internal", file: "Latihan Soal Penerimaan Barang.xlsx", sheet: "Penerimaan", row: 4 },
+      { id: "s14", q: "Saat menerima pengiriman barang dari mobil WH, langkah pertama yang wajib diperiksa oleh pejabat toko sebelum membuka segel adalah…", a: "Memeriksa kesesuaian nomor segel pada kontainer dengan surat jalan", file: "Latihan Soal Penerimaan Barang.xlsx", sheet: "Penerimaan", row: 7 },
+      { id: "s15", q: "Alat bantu yang dapat digunakan untuk mengangkat barang berat di area toko adalah", a: "Troli", file: "Latihan Soal Penerimaan Barang.xlsx", sheet: "Penerimaan", row: 11 },
+      { id: "s16", q: "Foto item tematik dilakukan untuk beberapa lokasi display berikut, kecuali…", a: "Clipstrip", file: "PENATAAN BARANG.xlsx", sheet: "PENATAAN", row: 2 },
+      { id: "s17", q: "Berikut ini adalah ruang lingkup kebersihan di area sales kecuali….", a: "Kebersihan halaman depan toko", file: "PENATAAN BARANG.xlsx", sheet: "Sheet1", row: 4 },
+      { id: "s18", q: "Batas maksimal barang expired atau rusak yang boleh dipajang di rak area sales toko adalah…", a: "Tidak boleh ada barang expired atau rusak di rak display", file: "PENATAAN BARANG.xlsx", sheet: "Sheet1", row: 8 },
+      { id: "s19", q: "Metode pengeluaran dan penataan barang berdasarkan tanggal kedaluwarsa terdekat diletakkan di bagian depan disebut…", a: "FEFO (First Expired First Out)", file: "PENATAAN BARANG.xlsx", sheet: "PENATAAN", row: 11 },
+      { id: "s20", q: "Pengisian dan perapihan rak display agar selalu terlihat penuh dan rapi dari depan ke belakang disebut aktivitas…", a: "Facing Up dan Full Display", file: "PENATAAN BARANG.xlsx", sheet: "Sheet1", row: 12 },
+      { id: "s21", q: "Alat bantu yang menunjukan keterangan suatu produk khususnya informasi harga barang yang terdisplay adalah definisi dari label price", a: "True", file: "PENATAAN BARANG.xlsx", sheet: "PENATAAN", row: 78 },
+      { id: "s22", q: "Penerimaan karyawan baru sepenuhnya adalah hal dan wewenang perusahaan, hal tersebut tercantum pada…", a: "Pasal 4 – Penerimaan Karyawan", file: "Corp Profile By RakaGTGBgt.xlsx", sheet: "Sheet1", row: 4 },
+      { id: "s23", q: "Dengan menjalankan tugas dan tanggung jawab jabatan dengan baik, termasuk memelihara fasilitas jabatan dan alat bantu kerja dengan baik sesuai fungsinya berarti anda sudah menerapkan prinsip Accountability pada diri Anda", a: "True", file: "Corp Profile By RakaGTGBgt.xlsx", sheet: "Sheet1", row: 778 },
+      { id: "s24", q: "Menghindarkan diri dari tindakan kecurangan seperti manipulasi data atau laporan, penggelapan barang dan uang milik perusahaan, penyalahgunaan asset dan alat bantu kerja termasuk kode etik yang berhubungan dengan prinsip …", a: "Independency", file: "Corp Profile By RakaGTGBgt.xlsx", sheet: "Sheet1", row: 1751 },
+      { id: "s25", q: "Nilai penggantian alat bantu dengar pada BPJS Kesehatan yaitu sebesar….", a: "Maks. Rp. 1.000.000, -", file: "Corp Profile By RakaGTGBgt.xlsx", sheet: "Sheet1", row: 4123 }
+    ];
+
+    const TARGET_MODULES = [
+      { file: "(1) SMK3 2026.xlsx", category: "SMK3" },
+      { file: "ADMINISTRASI News.xlsx", category: "ADMINISTRASI" },
+      { file: "Bank_Soal_Alfamart_All_In_One.xlsx", category: "BANK SOAL" },
+      { file: "Modul Latihan Penerimaan Barang.xlsx", category: "PENERIMAAN" },
+      { file: "Modul Latihan Penyimpanan Barang.xlsx", category: "PENYIMPANAN" },
+      { file: "Modul Latihan Service.xlsx", category: "SERVICE" },
+      { file: "Modul Latihan Soft Skill.xlsx", category: "SOFT SKILL" },
+      { file: "Modul Latihan Stock Opname.xlsx", category: "STOCK OPNAME" },
+      { file: "Modul Latihan Store Performance.xlsx", category: "STORE PERFORMANCE" },
+      { file: "Modul Latihan Transaks Kasir Persiapan.xlsx", category: "TRANSAKSI KASIR" }
+    ];
+
+    const MENUS = [
+      { id: "home", label: "1. HOME" },
+      { id: "browser", label: "2. MINI BROWSER & AUTO-PILOT" },
+      { id: "database", label: "3. KNOWLEDGE DATABASE" },
+      { id: "upload", label: "4. UPLOAD CENTER" },
+      { id: "match", label: "5. JARVIS MATCH ENGINE" },
+      { id: "ai", label: "6. AI BRAIN (GEMINI)" },
+      { id: "history", label: "7. MATCH HISTORY" },
+      { id: "manager", label: "8. DATABASE MANAGER" },
+      { id: "settings", label: "9. SETTINGS" }
+    ];
+
+    /* =========================================================================
+       2. GLOBAL STATE & FAST O(1) + INVERTED TOKEN INDEX
+       ========================================================================= */
+    let activeDB = [];
+    let exactMap = new Map();
+    let tokenIndex = new Map();
+    let matchHistory = [];
+    let lastLiveResults = [];
+    let lastManualResults = [];
+    let dbPage = 1;
+    let dbSearchTimer = null;
+    let browserMode = "direct";
+    let bridgeConnected = false;
+    let confirmAction = null;
+
+    let appSettings = {
+      autoRun: true,
+      fuzzyThreshold: 72,
+      clickDelayMs: 120,
+      aiAutoSuggest: true,
+      geminiApiKey: ""
+    };
+
+    const IDB_NAME = "JarvisHumanoidPermanentV4";
+    let idbInstance = null;
+
+    function openIDB() {
+      return new Promise((resolve) => {
+        if (idbInstance) return resolve(idbInstance);
+        try {
+          const req = indexedDB.open(IDB_NAME, 1);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains("records")) db.createObjectStore("records", { keyPath: "id" });
+            if (!db.objectStoreNames.contains("history")) db.createObjectStore("history", { keyPath: "id" });
+            if (!db.objectStoreNames.contains("meta")) db.createObjectStore("meta", { keyPath: "id" });
+          };
+          req.onsuccess = (e) => { idbInstance = e.target.result; resolve(idbInstance); };
+          req.onerror = () => resolve(null);
+        } catch { resolve(null); }
+      });
+    }
+
+    async function idbGetAll(store) {
+      const db = await openIDB();
+      if (!db) return [];
+      return new Promise((res) => {
+        const req = db.transaction(store, "readonly").objectStore(store).getAll();
+        req.onsuccess = () => res(req.result || []);
+        req.onerror = () => res([]);
+      });
+    }
+
+    async function idbPutChunked(store, items, chunkSize = 500) {
+      const db = await openIDB();
+      if (!db || !items.length) return;
+      for (let i = 0; i < items.length; i += chunkSize) {
+        const slice = items.slice(i, i + chunkSize);
+        await new Promise((res) => {
+          const tx = db.transaction(store, "readwrite");
+          const os = tx.objectStore(store);
+          slice.forEach((it) => os.put(it));
+          tx.oncomplete = () => res(true);
+          tx.onerror = () => res(false);
+        });
+      }
+    }
+
+    async function idbClear(store) {
+      const db = await openIDB();
+      if (!db) return;
+      return new Promise((res) => {
+        const tx = db.transaction(store, "readwrite");
+        tx.objectStore(store).clear();
+        tx.oncomplete = () => res(true);
+        tx.onerror = () => res(false);
+      });
+    }
+
+    /* =========================================================================
+       3. UTILITIES & CATEGORY DETECTION
+       ========================================================================= */
+    function escapeHtml(s) {
+      return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    function normalizeText(s) {
+      return String(s || "")
+        .toLowerCase()
+        .replace(/^\s*(?:question|soal|no\.?|nomor|q)?\s*\d+\s*[\.\)\-:]\s*/i, "")
+        .replace(/[^\p{L}\p{N}\s]/gu, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function tokenize(nq) {
+      return nq.split(" ").filter((w) => w.length > 2);
+    }
+
+    function diceSim(a, b) {
+      if (!a || !b) return 0;
+      if (a === b) return 1;
+      if (a.length < 2 || b.length < 2) return 0;
+      const m = new Map();
+      for (let i = 0; i < a.length - 1; i++) {
+        const g = a.slice(i, i + 2);
+        m.set(g, (m.get(g) || 0) + 1);
+      }
+      let inter = 0;
+      for (let i = 0; i < b.length - 1; i++) {
+        const g = b.slice(i, i + 2);
+        const c = m.get(g) || 0;
+        if (c > 0) { inter++; m.set(g, c - 1); }
+      }
+      return (2 * inter) / (a.length - 1 + b.length - 1);
+    }
+
+    function detectModuleCategory(fileName) {
+      const f = String(fileName || "").toLowerCase();
+      if (f.includes("smk3") || f.includes("k3")) return { label: "SMK3", color: "bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300" };
+      if (f.includes("daily")) return { label: "DAILY ACTIVITY", color: "bg-sky-100 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300" };
+      if (f.includes("penataan") || f.includes("display")) return { label: "PENATAAN", color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300" };
+      if (f.includes("penerimaan")) return { label: "PENERIMAAN", color: "bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300" };
+      if (f.includes("penyimpanan")) return { label: "PENYIMPANAN", color: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300" };
+      if (f.includes("administrasi") || f.includes("admin")) return { label: "ADMINISTRASI", color: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300" };
+      if (f.includes("service")) return { label: "SERVICE", color: "bg-pink-100 text-pink-700 dark:bg-pink-900/50 dark:text-pink-300" };
+      if (f.includes("soft skill")) return { label: "SOFT SKILL", color: "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/50 dark:text-fuchsia-300" };
+      if (f.includes("stock opname")) return { label: "STOCK OPNAME", color: "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300" };
+      if (f.includes("performance")) return { label: "STORE PERFORMANCE", color: "bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300" };
+      if (f.includes("kasir") || f.includes("transaks")) return { label: "TRANSAKSI KASIR", color: "bg-lime-100 text-lime-700 dark:bg-lime-900/50 dark:text-lime-300" };
+      if (f.includes("bank_soal") || f.includes("all_in_one")) return { label: "BANK SOAL", color: "bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300" };
+      if (f.includes("bean")) return { label: "BEANSPOT", color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300" };
+      if (f.includes("corp")) return { label: "CORP PROFILE", color: "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300" };
+      return { label: "MODUL KUIS", color: "bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300" };
+    }
+
+    function showToast(msg) {
+      const box = document.getElementById("toastBox");
+      const el = document.createElement("div");
+      el.className = "px-4 py-2 rounded-xl bg-slate-900 dark:bg-indigo-600 text-white text-xs font-bold shadow-xl transition-opacity duration-300";
+      el.textContent = msg;
+      box.appendChild(el);
+      setTimeout(() => { el.style.opacity = "0"; setTimeout(() => el.remove(), 300); }, 2600);
+    }
+
+    function copyText(str) {
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = str;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        showToast("📋 Berhasil disalin ke clipboard!");
+      } catch { showToast("Gagal menyalin otomatis."); }
+    }
+
+    function copyElementText(id) {
+      const el = document.getElementById(id);
+      if (el) copyText(el.textContent || el.value || "");
+    }
+
+    /* =========================================================================
+       4. INDEXING & 5-LAYER MATCH ENGINE (<30ms DI 10.000+ SOAL)
+       ========================================================================= */
+    function rebuildFastIndex() {
+      exactMap = new Map();
+      tokenIndex = new Map();
+
+      for (let i = 0; i < activeDB.length; i++) {
+        const r = activeDB[i];
+        r._nq = r._nq || normalizeText(r.q);
+        if (!exactMap.has(r._nq)) exactMap.set(r._nq, r);
+        const toks = tokenize(r._nq);
+        for (const t of toks) {
+          let bucket = tokenIndex.get(t);
+          if (!bucket) { bucket = []; tokenIndex.set(t, bucket); }
+          if (bucket.length < 350) bucket.push(r);
+        }
+      }
+      updateAllStatsUI();
+    }
+
+    function matchSingleQuestion(qText, options = []) {
+      const nq = normalizeText(qText);
+      if (!nq) return { status: "UNMATCHED", score: 0, record: null, matchedOption: null };
+
+      // Layer 1 & 2: O(1) Exact / Normalized Match
+      let best = exactMap.get(nq) || null;
+      let bestScore = best ? 100 : 0;
+
+      // Layer 3 & 4: Candidate retrieval via Inverted Token Index
+      if (!best) {
+        const toks = tokenize(nq);
+        const candidateCounts = new Map();
+        for (const t of toks) {
+          const b = tokenIndex.get(t);
+          if (!b) continue;
+          for (const r of b) candidateCounts.set(r, (candidateCounts.get(r) || 0) + 1);
+        }
+        const candidates = candidateCounts.size
+          ? Array.from(candidateCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 80).map((x) => x[0])
+          : activeDB.slice(0, 200);
+
+        for (const r of candidates) {
+          let sc = diceSim(nq, r._nq) * 100;
+          if (nq.length > 15 && (r._nq.includes(nq) || nq.includes(r._nq))) sc = Math.min(97, sc + 12);
+          sc = Math.round(sc);
+          if (sc > bestScore) { bestScore = sc; best = r; }
+        }
+      }
+
+      if (!best || bestScore < appSettings.fuzzyThreshold) {
+        return { status: "UNMATCHED", score: bestScore, record: null, matchedOption: null };
+      }
+
+      // Layer 5: Option Validation
+      let matchedOption = null;
+      if (options.length) {
+        const na = normalizeText(best.a);
+        let bestOptScore = 0;
+        for (const opt of options) {
+          const no = normalizeText(opt.text);
+          if (!no) continue;
+          if (no === na) { matchedOption = opt; bestOptScore = 100; break; }
+          let s = diceSim(na, no) * 100;
+          if (na.length > 2 && (no.includes(na) || na.includes(no))) s = Math.max(s, 84);
+          if (s > bestOptScore) { bestOptScore = s; matchedOption = opt; }
+        }
+        if (bestOptScore < 58) matchedOption = null;
+      }
+
+      return {
+        status: bestScore >= 98 ? "EXACT" : "FUZZY",
+        score: bestScore,
+        record: best,
+        matchedOption
+      };
+    }
+
+    /* =========================================================================
+       5. MINI BROWSER & 3-PATH AUTO-PILOT (PROXY, BRIDGE, ANDROID WEBVIEW)
+       ========================================================================= */
+    function setBrowserMode(mode) {
+      browserMode = mode;
+      const iframe = document.getElementById("alfaIframe");
+      const urlInp = document.getElementById("browserUrlInput");
+      const btnD = document.getElementById("btnModeDirect");
+      const btnP = document.getElementById("btnModeProxy");
+
+      if (mode === "proxy") {
+        btnP.className = "px-2.5 py-1.5 rounded-lg bg-violet-600 text-white transition";
+        btnD.className = "px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 transition";
+        urlInp.value = "/alfa/";
+        iframe.src = "/alfa/";
+        updateBridgeBadge(true, "🟢 Vercel Proxy (/alfa/)");
+      } else {
+        btnD.className = "px-2.5 py-1.5 rounded-lg bg-violet-600 text-white transition";
+        btnP.className = "px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 transition";
+        urlInp.value = "https://alfalearning.sat.co.id/";
+        iframe.src = "https://alfalearning.sat.co.id/";
+        updateBridgeBadge(bridgeConnected, bridgeConnected ? "🟢 Bridge Aktif" : "🟠 Butuh Proxy / Tampermonkey");
+      }
+    }
+
+    function updateBridgeBadge(ok, text) {
+      const el = document.getElementById("bridgeStatusText");
+      const pill = document.getElementById("headerBridgePill");
+      if (el) {
+        el.textContent = text;
+        el.className = ok
+          ? "px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+          : "px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300";
+      }
+      if (pill) {
+        pill.textContent = ok ? "🟢 Auto-Klik Aktif" : "⚙️ Setup Auto-Klik";
+        pill.className = ok
+          ? "px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+          : "px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300";
+      }
+    }
+
+    function browserGoUrl() {
+      let u = document.getElementById("browserUrlInput").value.trim();
+      if (!u) return;
+      if (!u.startsWith("/") && !/^https?:\/\//i.test(u)) u = "https://" + u;
+      document.getElementById("alfaIframe").src = u;
+    }
+
+    function browserNav(act) {
+      const iframe = document.getElementById("alfaIframe");
+      if (act === "home") setBrowserMode(browserMode);
+      else if (act === "reload") iframe.src = iframe.src;
+      else if (act === "back") { try { iframe.contentWindow.history.back(); } catch { showToast("Gunakan navigasi dalam halaman."); } }
+    }
+
+    function openBrowserNewTab() {
+      const u = document.getElementById("browserUrlInput").value.trim();
+      window.open(u.startsWith("/") ? "https://alfalearning.sat.co.id/" : u, "_blank", "noopener");
+    }
+
+    function toggleBrowserFullscreen() {
+      const el = document.getElementById("miniBrowserContainer");
+      if (!document.fullscreenElement) el.requestFullscreen?.().catch(() => {});
+      else document.exitFullscreen?.();
+    }
+
+    function triggerAutoPilotPlay() {
+      const iframe = document.getElementById("alfaIframe");
+
+      // Pathway A: Same-Origin Direct DOM (Vercel Proxy /alfa/)
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (doc && doc.body && (doc.querySelector(".que") || doc.querySelector(".formulation"))) {
+          runSameOriginAutoPilot(doc);
+          return;
+        }
+      } catch {}
+
+      // Pathway B: Android WebView Native Bridge
+      if (window.AndroidJarvis && typeof window.AndroidJarvis.executeAutoPilot === "function") {
+        window.AndroidJarvis.executeAutoPilot(JSON.stringify(activeDB.map(({ q, a, file, row }) => ({ q, a, file, row }))));
+        showToast("▶ Mengirim perintah Auto-Pilot ke Android WebView...");
+        return;
+      }
+
+      // Pathway C: Cross-Origin Bridge (Tampermonkey Userscript v4)
+      if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage({
+          type: "JARVIS_EXECUTE_PLAY",
+          db: activeDB.map(({ q, a, file, row }) => ({ q, a, file, row })),
+          threshold: appSettings.fuzzyThreshold,
+          delayMs: appSettings.clickDelayMs
+        }, "*");
+        if (!bridgeConnected) {
+          showToast("Jika kuis belum terklik otomatis, aktifkan Vercel Proxy atau klik ⚙️ Setup Auto-Klik.");
+        } else {
+          showToast("▶ Auto-Pilot dijalankan melalui Bridge!");
+        }
+      }
+    }
+
+    function runSameOriginAutoPilot(doc) {
+      const boxes = Array.from(doc.querySelectorAll(".que"));
+      const targets = boxes.length ? boxes : Array.from(doc.querySelectorAll(".formulation"));
+      const results = [];
+      let exact = 0, fuzzy = 0, unmatched = 0;
+
+      targets.forEach((box, idx) => {
+        const qEl = box.querySelector(".qtext") || box.querySelector("h3, h4, p");
+        const qText = (qEl ? qEl.innerText : "").trim();
+        if (!qText) return;
+
+        const radios = Array.from(box.querySelectorAll('.answer input[type="radio"], input[type="radio"]'));
+        const options = radios.map((inp, i) => {
+          let txt = "";
+          if (inp.id) {
+            const lbl = box.querySelector('label[for="' + CSS.escape(inp.id) + '"]');
+            if (lbl) txt = lbl.innerText.trim();
+          }
+          if (!txt && inp.parentElement) txt = inp.parentElement.innerText.trim();
+          txt = txt.replace(/^[a-eA-E][\.\)]\s*/, "").trim();
+          return { index: i, text: txt, el: inp, wrap: inp.closest(".r0, .r1, div, label") || inp.parentElement };
+        });
+
+        const m = matchSingleQuestion(qText, options);
+        box.querySelectorAll(".jarvis-badge").forEach((b) => b.remove());
+
+        const badge = doc.createElement("div");
+        badge.className = "jarvis-badge";
+        badge.style.cssText = "padding:8px 12px;margin-bottom:8px;border-radius:10px;font-family:sans-serif;font-size:12px;font-weight:700;";
+
+        if ((m.status === "EXACT" || m.status === "FUZZY") && m.matchedOption) {
+          const isEx = m.status === "EXACT";
+          if (isEx) exact++; else fuzzy++;
+          const col = isEx ? "#10b981" : "#f59e0b";
+          const bg = isEx ? "#ecfdf5" : "#fffbeb";
+          box.style.border = "2.5px solid " + col;
+          box.style.borderRadius = "12px";
+
+          setTimeout(() => {
+            m.matchedOption.el.click();
+            m.matchedOption.el.checked = true;
+            m.matchedOption.el.dispatchEvent(new Event("change", { bubbles: true }));
+            if (m.matchedOption.wrap) {
+              m.matchedOption.wrap.style.background = bg;
+              m.matchedOption.wrap.style.border = "2px solid " + col;
+              m.matchedOption.wrap.style.borderRadius = "8px";
+            }
+          }, idx * appSettings.clickDelayMs);
+
+          badge.style.background = bg;
+          badge.style.color = isEx ? "#065f46" : "#92400e";
+          badge.style.border = "1.5px solid " + col;
+          badge.textContent = `⚡ JARVIS • ${m.score}% ${m.status} • AUTO-CLICKED (${m.record.file} • Row ${m.record.row})`;
+        } else {
+          unmatched++;
+          box.style.border = "2.5px solid #ef4444";
+          box.style.borderRadius = "12px";
+          badge.style.background = "#fef2f2";
+          badge.style.color = "#991b1b";
+          badge.style.border = "1.5px solid #ef4444";
+          badge.textContent = "🔴 JARVIS • UNMATCHED (Tidak diklik otomatis — cek SARAN AI di bawah)";
+        }
+
+        const host = box.querySelector(".formulation") || box;
+        host.insertBefore(badge, host.firstChild);
+
+        results.push({
+          number: idx + 1,
+          question: qText,
+          options: options.map((o) => o.text),
+          status: m.matchedOption ? m.status : "UNMATCHED",
+          score: m.score,
+          answer: m.record ? m.record.a : null,
+          source: m.record ? `${m.record.file} • Row ${m.record.row}` : null
+        });
+      });
+
+      renderLiveReport(results, { total: results.length, exact, fuzzy, unmatched });
+    }
+
+    function renderLiveReport(results, summary) {
+      lastLiveResults = results;
+      const card = document.getElementById("liveReportCard");
+      card.classList.remove("hidden");
+      document.getElementById("liveReportSummary").textContent = `${summary.total} Soal Dianalisis`;
+      document.getElementById("liveStatExact").textContent = `${summary.exact} Exact`;
+      document.getElementById("liveStatFuzzy").textContent = `${summary.fuzzy} Fuzzy`;
+      document.getElementById("liveStatUnmatched").textContent = `${summary.unmatched} Unmatched`;
+
+      const list = document.getElementById("liveReportList");
+      list.innerHTML = results.map((r, i) => {
+        const badgeCls = r.status === "EXACT" ? "bg-emerald-600" : r.status === "FUZZY" ? "bg-amber-500" : "bg-rose-600";
+        return `
+          <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2 text-xs">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold text-white ${badgeCls}">#${r.number} • ${r.score}% ${r.status}</span>
+              <div class="flex gap-1.5">
+                <button onclick="copyText(decodeURIComponent('${encodeURIComponent(r.question)}'))" class="px-2 py-1 rounded-lg bg-slate-200 dark:bg-slate-800 font-bold">📋 Copy Soal</button>
+                ${r.answer ? `<button onclick="copyText(decodeURIComponent('${encodeURIComponent(r.answer)}'))" class="px-2 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 font-bold">📋 Copy Jawaban</button>` : ""}
+              </div>
+            </div>
+            <div class="font-semibold text-slate-800 dark:text-slate-100">${escapeHtml(r.question)}</div>
+            ${r.answer
+              ? `<div class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300"><strong>Jawaban:</strong> ${escapeHtml(r.answer)} <span class="text-[10px] opacity-75">(${escapeHtml(r.source || "DB")})</span></div>`
+              : `<div id="liveAiSlot_${i}" class="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 space-y-1.5">
+                   <div class="font-bold text-rose-700 dark:text-rose-300">Belum ada di database (Tidak auto-klik).</div>
+                   <button onclick="requestAiForLive(${i})" class="px-3 py-1 rounded-lg bg-violet-600 text-white font-bold">✨ Minta SARAN AI (Gemini)</button>
+                 </div>`}
+          </div>
+        `;
+      }).join("");
+
+      recordHistorySession("AUTO-PILOT", summary.total, summary.exact, summary.unmatched, results[0]?.question || "Sesi Kuis");
+
+      // Auto-Referensi AI jika diaktifkan
+      if (appSettings.aiAutoSuggest) {
+        results.forEach((r, i) => { if (r.status === "UNMATCHED") requestAiForLive(i); });
+      }
+    }
+
+    function copyAllQuizQuestions() {
+      if (lastLiveResults.length) {
+        const txt = lastLiveResults.map((r) => `${r.number}. ${r.question}`).join("\n\n");
+        copyText(txt);
+        return;
+      }
+      const iframe = document.getElementById("alfaIframe");
+      try {
+        const doc = iframe.contentDocument;
+        if (doc) {
+          const qs = Array.from(doc.querySelectorAll(".qtext")).map((el, i) => `${i + 1}. ${el.innerText.trim()}`);
+          if (qs.length) return copyText(qs.join("\n\n"));
+        }
+      } catch {}
+      iframe.contentWindow?.postMessage({ type: "JARVIS_COPY_QUESTIONS" }, "*");
+      showToast("Mengambil teks soal dari halaman kuis...");
+    }
+
+    function copyAllQuizAnswers() {
+      if (!lastLiveResults.length) return showToast("Jalankan PLAY AUTO-PILOT terlebih dahulu.");
+      const txt = lastLiveResults.map((r) => `${r.number}. ${r.answer || "[UNMATCHED]"}`).join("\n");
+      copyText(txt);
+    }
+
+    // Listen to Userscript Bridge messages
+    window.addEventListener("message", (e) => {
+      const d = e.data;
+      if (!d || typeof d !== "object") return;
+      if (d.type === "JARVIS_BRIDGE_READY" || d.type === "JARVIS_PONG") {
+        bridgeConnected = true;
+        updateBridgeBadge(true, "🟢 Bridge Aktif");
+        if (appSettings.autoRun && String(d.url || "").includes("/mod/quiz/")) {
+          triggerAutoPilotPlay();
+        }
+      } else if (d.type === "JARVIS_PLAY_RESULT" && Array.isArray(d.results)) {
+        renderLiveReport(d.results, d.summary || { total: d.results.length, exact: 0, fuzzy: 0, unmatched: 0 });
+      } else if (d.type === "JARVIS_QUESTIONS_COPIED" && d.text) {
+        copyText(d.text);
+      }
+    });
+
+    /* =========================================================================
+       6. UPLOAD CENTER (UNLIMITED MB + TOLAK NAMA FILE DUPLIKAT SAJA)
+       ========================================================================= */
+    function appendFeedLine(msg, colorClass = "text-slate-300") {
+      const feed = document.getElementById("liveExtractionFeed");
+      if (!feed) return;
+      const div = document.createElement("div");
+      div.className = colorClass;
+      div.textContent = msg;
+      feed.appendChild(div);
+      if (feed.children.length > 80) feed.removeChild(feed.firstChild);
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    async function handleBatchUpload(fileList) {
+      const files = Array.from(fileList || []);
+      if (!files.length) return;
+
+      const card = document.getElementById("uploadProgressCard");
+      const bar = document.getElementById("uploadProgressBar");
+      const pctEl = document.getElementById("uploadProgressPct");
+      const lbl = document.getElementById("uploadProgressLabel");
+      card.classList.remove("hidden");
+      document.getElementById("liveExtractionFeed").innerHTML = "";
+
+      const existingFileNames = new Set(activeDB.map((r) => (r.file || "").toLowerCase().trim()));
+      let totalAdded = 0, totalDupFiles = 0, totalProcessed = 0;
+      const startTime = performance.now();
+
+      for (let fi = 0; fi < files.length; fi++) {
+        const file = files[fi];
+        const lowerName = file.name.toLowerCase().trim();
+        document.getElementById("upStatFiles").textContent = `${fi + 1} / ${files.length}`;
+
+        // Tolak HANYA jika nama file sama / sudah ada di database
+        if (existingFileNames.has(lowerName)) {
+          totalDupFiles++;
+          document.getElementById("upStatDup").textContent = `${totalDupFiles} file`;
+          appendFeedLine(`[⊘ FILE DUPLIKAT DITOLAK] "${file.name}" sudah ada di database.`, "text-amber-400");
+          continue;
+        }
+        existingFileNames.add(lowerName);
+
+        lbl.textContent = `Membaca "${file.name}"...`;
+        appendFeedLine(`📂 Memproses "${file.name}"...`, "text-sky-300");
+
+        try {
+          const rows = await parseAnyFile(file);
+          if (!rows.length) {
+            appendFeedLine(`⚠️ Tidak ditemukan pasangan Soal & Jawaban di "${file.name}".`, "text-amber-300");
+            continue;
+          }
+
+          appendFeedLine(`🔍 Ditemukan ${rows.length.toLocaleString("id-ID")} soal di "${file.name}" — memasukkan semua...`, "text-violet-300");
+
+          const CHUNK = 250;
+          const fileNewlyAdded = [];
+          for (let i = 0; i < rows.length; i += CHUNK) {
+            const slice = rows.slice(i, i + CHUNK);
+            let sample = null;
+
+            for (const row of slice) {
+              totalProcessed++;
+              const nq = normalizeText(row.q);
+              if (!nq || !row.a) continue;
+
+              const rec = {
+                id: `rec_${Date.now().toString(36)}_${fi}_${totalAdded}_${Math.random().toString(36).slice(2, 6)}`,
+                q: row.q,
+                a: row.a,
+                file: file.name,
+                sheet: row.sheet || "Sheet1",
+                row: row.row || (totalAdded + 1),
+                _nq: nq
+              };
+              activeDB.push(rec);
+              fileNewlyAdded.push(rec);
+              totalAdded++;
+              if (!sample) sample = `${row.q.slice(0, 52)} → ${row.a.slice(0, 28)}`;
+            }
+
+            if (sample) appendFeedLine(`[+ MASUK] ${sample}`, "text-emerald-400");
+
+            const elapsed = Math.max(0.05, (performance.now() - startTime) / 1000);
+            const pct = Math.round(((fi + Math.min(1, (i + CHUNK) / rows.length)) / files.length) * 100);
+            bar.style.width = `${pct}%`;
+            pctEl.textContent = `${pct}%`;
+            document.getElementById("upStatAdded").textContent = totalAdded.toLocaleString("id-ID");
+            document.getElementById("upStatSpeed").textContent = `${Math.round(totalProcessed / elapsed).toLocaleString("id-ID")} / dtk`;
+            await new Promise((r) => setTimeout(r, 0));
+          }
+
+          // Simpan langsung per file ke IndexedDB agar anti-hilang saat refresh
+          if (fileNewlyAdded.length) {
+            await idbPutChunked("records", fileNewlyAdded, 500);
+            rebuildFastIndex();
+            appendFeedLine(`💾 "${file.name}" (${fileNewlyAdded.length.toLocaleString("id-ID")} soal) tersimpan permanen!`, "text-emerald-300");
+          }
+        } catch (err) {
+          appendFeedLine(`❌ Gagal memproses "${file.name}": ${err.message}`, "text-rose-400");
+        }
+      }
+
+      bar.style.width = "100%";
+      pctEl.textContent = "100%";
+      lbl.textContent = `Selesai! +${totalAdded.toLocaleString("id-ID")} soal masuk (${totalDupFiles} file duplikat ditolak).`;
+      rebuildFastIndex();
+      renderDatabaseTable(1);
+      showToast(`✅ Selesai! +${totalAdded.toLocaleString("id-ID")} soal tersimpan permanen.`);
+    }
+
+    async function parseAnyFile(file) {
+      const ext = (file.name.split(".").pop() || "").toLowerCase();
+      if (["xlsx", "xls", "csv"].includes(ext)) {
+        if (typeof XLSX === "undefined") throw new Error("Library Excel belum termuat.");
+        const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
+        const out = [];
+        for (const sheetName of wb.SheetNames) {
+          const matrix = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, defval: "" });
+          if (!matrix.length) continue;
+          let headerIdx = -1;
+          const pairs = [];
+          const qKeys = ["soal", "pertanyaan", "question"];
+          const aKeys = ["jawaban", "kunci", "answer"];
+
+          for (let r = 0; r < Math.min(5, matrix.length); r++) {
+            const row = matrix[r].map((c) => String(c || "").toLowerCase().trim());
+            const qc = [], ac = [];
+            row.forEach((cell, ci) => {
+              if (qKeys.some((k) => cell.includes(k))) qc.push(ci);
+              else if (aKeys.some((k) => cell.includes(k))) ac.push(ci);
+            });
+            if (qc.length && ac.length) {
+              headerIdx = r;
+              for (let k = 0; k < Math.min(qc.length, ac.length); k++) pairs.push([qc[k], ac[k]]);
+              break;
+            }
+          }
+          if (!pairs.length) pairs.push([0, 1]);
+
+          for (let r = headerIdx + 1; r < matrix.length; r++) {
+            const row = matrix[r];
+            for (const [qc, ac] of pairs) {
+              const q = String(row[qc] || "").replace(/\s+/g, " ").trim();
+              const a = String(row[ac] || "").replace(/\s+/g, " ").trim();
+              if (q && a) out.push({ q, a, sheet: sheetName, row: r + 1 });
+            }
+          }
+        }
+        return out;
+      }
+      if (ext === "json") {
+        const parsed = JSON.parse(await file.text());
+        const arr = Array.isArray(parsed) ? parsed : (parsed.records || parsed.data || []);
+        return arr.map((it, i) => ({
+          q: String(it.q || it.question || it.soal || "").trim(),
+          a: String(it.a || it.answer || it.jawaban || "").trim(),
+          sheet: it.sheet || "JSON",
+          row: it.row || (i + 1)
+        })).filter((x) => x.q && x.a);
+      }
+      if (ext === "pdf" && typeof pdfjsLib !== "undefined") {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+        const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+        let txt = "";
+        for (let p = 1; p <= pdf.numPages; p++) {
+          const content = await (await pdf.getPage(p)).getTextContent();
+          txt += content.items.map((i) => i.str).join(" ") + "\n";
+        }
+        return parsePlainTextQA(txt, "PDF");
+      }
+      if (ext === "docx" && typeof mammoth !== "undefined") {
+        const res = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+        return parsePlainTextQA(res.value || "", "DOCX");
+      }
+      return parsePlainTextQA(await file.text(), "TXT");
+    }
+
+    function parsePlainTextQA(text, sheet) {
+      const out = [];
+      const blocks = text.split(/\n{2,}|(?=(?:Soal|Pertanyaan|Q)\s*\d*\s*[:\.])/i);
+      blocks.forEach((b, i) => {
+        const m = b.match(/(?:(?:Soal|Pertanyaan|Q)\s*\d*\s*[:\.]\s*)?([\s\S]+?)\s*(?:Jawaban|Kunci|Answer|A)\s*[:\.]\s*([\s\S]+)/i);
+        if (m) out.push({ q: m[1].trim(), a: m[2].trim(), sheet, row: i + 1 });
+      });
+      return out;
+    }
+
+    /* =========================================================================
+       7. GITHUB PERMANENT LINTAS DEVICE & AUTO-LOAD REPO
+       ========================================================================= */
+    async function savePermanentLocalNow() {
+      await idbPutChunked("records", activeDB, 500);
+      showToast(`💾 ${activeDB.length.toLocaleString("id-ID")} soal tersimpan permanen di perangkat ini!`);
+    }
+
+    function exportMasterDbForGithub() {
+      const clean = activeDB.map(({ q, a, file, sheet, row }) => ({ q, a, file, sheet, row }));
+      const blob = new Blob([JSON.stringify(clean)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "JARVIS_MASTER_DB.json";
+      a.click();
+      showToast(`💾 JARVIS_MASTER_DB.json (${clean.length.toLocaleString("id-ID")} soal) diunduh!`);
+    }
+
+    async function saveGithubSyncConfig() {
+      const repo = (document.getElementById("ghRepoInput")?.value || "").trim();
+      const token = (document.getElementById("ghTokenInput")?.value || "").trim();
+      await idbPutChunked("meta", [{ id: "github_sync_cfg", repo, token }], 5);
+    }
+
+    async function pushMasterDbToGithub() {
+      const repo = (document.getElementById("ghRepoInput")?.value || "").trim();
+      const token = (document.getElementById("ghTokenInput")?.value || "").trim();
+      const btn = document.getElementById("btnPushGithubDb");
+      if (!repo || !token) return showToast("Isi nama repo & GitHub Token dulu, atau klik Export JARVIS_MASTER_DB.json.");
+      await saveGithubSyncConfig();
+      btn.disabled = true; btn.textContent = "⏳ Mengunggah...";
+      try {
+        const apiUrl = `https://api.github.com/repos/${repo}/contents/JARVIS_MASTER_DB.json`;
+        const headers = { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "Content-Type": "application/json" };
+        let sha;
+        const chk = await fetch(apiUrl, { headers });
+        if (chk.ok) sha = (await chk.json()).sha;
+
+        const clean = activeDB.map(({ q, a, file, sheet, row }) => ({ q, a, file, sheet, row }));
+        const bytes = new TextEncoder().encode(JSON.stringify(clean));
+        let bin = "";
+        for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+
+        const res = await fetch(apiUrl, {
+          method: "PUT",
+          headers,
+          body: JSON.stringify({ message: `Update JARVIS_MASTER_DB.json (${clean.length} soal)`, content: btoa(bin), ...(sha ? { sha } : {}) })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        showToast(`☁️ Berhasil! ${clean.length.toLocaleString("id-ID")} soal permanen di GitHub & semua device!`);
+      } catch (err) {
+        showToast("❌ Gagal push GitHub: " + err.message);
+      } finally {
+        btn.disabled = false; btn.textContent = "☁️ Push Permanent ke GitHub";
+      }
+    }
+
+    async function autoLoadRepoMasterDb() {
+      try {
+        const res = await fetch("./JARVIS_MASTER_DB.json?v=" + Date.now());
+        if (!res.ok) return;
+        const arr = await res.json();
+        if (!Array.isArray(arr) || !arr.length) return;
+        const existingFiles = new Set(activeDB.map((r) => (r.file || "").toLowerCase().trim()));
+        const toAdd = [];
+        arr.forEach((it, idx) => {
+          const fn = (it.file || "JARVIS_MASTER_DB.json").trim();
+          if (it.q && it.a && !existingFiles.has(fn.toLowerCase())) {
+            toAdd.push({
+              id: `repo_${fn.toLowerCase().replace(/[^a-z0-9]/g, "_")}_${it.row || idx}`,
+              q: String(it.q).trim(),
+              a: String(it.a).trim(),
+              file: fn,
+              sheet: it.sheet || "Master",
+              row: it.row || (idx + 1)
+            });
+          }
+        });
+        if (toAdd.length) {
+          activeDB.push(...toAdd);
+          rebuildFastIndex();
+          await idbPutChunked("records", toAdd, 500);
+          renderDatabaseTable(1);
+          showToast(`☁️ Auto-Load Repo: +${toAdd.length.toLocaleString("id-ID")} soal permanen dimuat!`);
+        }
+      } catch {}
+    }
+
+    /* =========================================================================
+       8. GEMINI AI BRAIN (AUTO-REFERENSI UNTUK SOAL UNMATCHED)
+       ========================================================================= */
+    async function callGeminiApi(promptText) {
+      const apiKey = (appSettings.geminiApiKey || "").trim();
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${encodeURIComponent(apiKey)}`;
+      const payload = {
+        contents: [{ parts: [{ text: promptText }] }],
+        generationConfig: { temperature: 0.2 }
+      };
+      const delays = [1000, 2000, 4000];
+      for (let attempt = 0; attempt <= delays.length; attempt++) {
+        try {
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          if (res.status === 429 && attempt < delays.length) {
+            await new Promise((r) => setTimeout(r, delays[attempt]));
+            continue;
+          }
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Tidak ada respons dari Gemini.";
+        } catch (err) {
+          if (attempt < delays.length) {
+            await new Promise((r) => setTimeout(r, delays[attempt]));
+            continue;
+          }
+          throw err;
+        }
+      }
+    }
+
+    async function testGeminiConnection() {
+      const banner = document.getElementById("aiStatusBanner");
+      await saveAiSettings(false);
+      banner.textContent = "⏳ Menguji koneksi ke Gemini API...";
+      try {
+        const reply = await callGeminiApi("Balas singkat: Koneksi JARVIS Gemini aktif!");
+        banner.className = "text-xs p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-bold";
+        banner.textContent = "✅ " + reply;
+      } catch (err) {
+        banner.className = "text-xs p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 font-bold";
+        banner.textContent = "❌ Gagal: " + err.message;
+      }
+    }
+
+    async function runAiChatTest() {
+      const q = document.getElementById("aiTestPromptInput").value.trim();
+      const box = document.getElementById("aiTestResponseBox");
+      if (!q) return;
+      box.classList.remove("hidden");
+      box.textContent = "⏳ Berpikir...";
+      try {
+        box.textContent = await callGeminiApi(q);
+      } catch (err) {
+        box.textContent = "❌ " + err.message;
+      }
+    }
+
+    async function saveAiSettings(notify = false) {
+      appSettings.geminiApiKey = (document.getElementById("geminiApiKeyInput")?.value || "").trim();
+      appSettings.aiAutoSuggest = Boolean(document.getElementById("aiAutoSuggestToggle")?.checked);
+      await idbPutChunked("meta", [{ id: "app_settings", ...appSettings }], 5);
+      if (notify) showToast("💾 Pengaturan Gemini AI tersimpan permanen!");
+    }
+
+    /* =========================================================================
+       9. MANUAL MATCH ENGINE, UI STATS, DATABASE TABLE, HISTORY
+       ========================================================================= */
+    async function pasteManualQuestion() {
+      try { document.getElementById("manualMatchInput").value = await navigator.clipboard.readText(); }
+      catch { showToast("Tempel manual dengan Ctrl+V."); }
+    }
+
+    function clearManualMatch() {
+      document.getElementById("manualMatchInput").value = "";
+      document.getElementById("manualMatchResults").innerHTML = "";
+    }
+
+    async function runManualMatch() {
+      const raw = document.getElementById("manualMatchInput").value.trim();
+      if (!raw) return showToast("Tempel pertanyaan terlebih dahulu.");
+      const blocks = raw.split(/\n(?=\s*(?:soal|no\.?|q)?\s*\d+[\.\)\-:]\s+)/i).map((s) => s.trim()).filter(Boolean);
+      const container = document.getElementById("manualMatchResults");
+      let exact = 0, unmatched = 0;
+
+      lastManualResults = blocks.map((b, i) => {
+        const m = matchSingleQuestion(b, []);
+        if (m.status === "EXACT") exact++;
+        if (m.status === "UNMATCHED") unmatched++;
+        return { number: i + 1, question: b, ...m };
+      });
+
+      container.innerHTML = lastManualResults.map((r, i) => {
+        const cls = r.status === "EXACT" ? "bg-emerald-600" : r.status === "FUZZY" ? "bg-amber-500" : "bg-rose-600";
+        return `
+          <div class="glass-card border rounded-2xl p-4 space-y-2 text-xs">
+            <div class="flex items-center justify-between gap-2">
+              <span class="px-2.5 py-0.5 rounded-full text-white font-extrabold ${cls}">#${r.number} • ${r.score}% ${r.status}</span>
+              ${r.record ? `<button onclick="copyText(decodeURIComponent('${encodeURIComponent(r.record.a)}'))" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 font-bold">📋 Copy Jawaban</button>` : ""}
+            </div>
+            <div class="font-semibold">${escapeHtml(r.question)}</div>
+            ${r.record
+              ? `<div class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300"><strong>Jawaban:</strong> ${escapeHtml(r.record.a)}<div class="text-[10px] opacity-75 mt-1">${escapeHtml(r.record.file)} • Row ${r.record.row}</div></div>`
+              : `<div id="manualAiSlot_${i}" class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 space-y-1.5">
+                   <div class="font-bold text-rose-600">Tidak ditemukan di database.</div>
+                   <button onclick="requestAiForManual(${i})" class="px-3 py-1 rounded-lg bg-violet-600 text-white font-bold">✨ Minta SARAN AI (Gemini)</button>
+                 </div>`}
+          </div>
+        `;
+      }).join("");
+
+      recordHistorySession("MANUAL", lastManualResults.length, exact, unmatched, blocks[0]);
+      if (appSettings.aiAutoSuggest) {
+        lastManualResults.forEach((r, i) => { if (r.status === "UNMATCHED") requestAiForManual(i); });
+      }
+    }
+
+    async function requestAiForManual(idx) {
+      const r = lastManualResults[idx];
+      const slot = document.getElementById(`manualAiSlot_${idx}`);
+      if (!r || !slot) return;
+      slot.innerHTML = `<div class="text-violet-600 font-bold">⏳ Gemini menganalisis...</div>`;
+      try {
+        const ans = await callGeminiApi(`Jawab singkat dan akurat untuk soal ritel Alfamart berikut:\n\n${r.question}`);
+        slot.className = "p-3 rounded-xl bg-violet-50 dark:bg-indigo-950/50 border border-violet-300 dark:border-indigo-700 space-y-1";
+        slot.innerHTML = `<div class="text-[10px] font-extrabold text-violet-700 dark:text-indigo-300">✨ SARAN AI (Referensi)</div><div class="whitespace-pre-wrap">${escapeHtml(ans)}</div>`;
+      } catch (err) {
+        slot.innerHTML = `<div class="text-rose-600 font-bold">⚠️ ${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    function updateAllStatsUI() {
+      const fileCounts = new Map();
+      for (const r of activeDB) {
+        const fn = r.file || "Database";
+        fileCounts.set(fn, (fileCounts.get(fn) || 0) + 1);
+      }
+      const totalFiles = fileCounts.size;
+      const totalRecs = activeDB.length;
+
+      document.getElementById("headerDbBadge").textContent = `💾 ${totalFiles} File Masuk • ${totalRecs.toLocaleString("id-ID")} Soal & Jawaban`;
+      document.getElementById("sidebarDbSummary").textContent = `${totalFiles} File • ${totalRecs.toLocaleString("id-ID")} Soal`;
+      document.getElementById("uploadSummaryPill").textContent = `${totalFiles} File • ${totalRecs.toLocaleString("id-ID")} Soal & Jawaban`;
+      document.getElementById("dbHeaderSub").textContent = `Total ${totalFiles} File • ${totalRecs.toLocaleString("id-ID")} Soal & Jawaban`;
+      document.getElementById("statFiles").textContent = totalFiles.toLocaleString("id-ID");
+      document.getElementById("statRecords").textContent = totalRecs.toLocaleString("id-ID");
+      document.getElementById("statExact").textContent = matchHistory.reduce((s, h) => s + (h.exact || 0), 0);
+      document.getElementById("statUnmatched").textContent = matchHistory.reduce((s, h) => s + (h.unmatched || 0), 0);
+
+      const entries = Array.from(fileCounts.entries()).sort((a, b) => b[1] - a[1]);
+
+      // Dropdown filter file
+      const sel = document.getElementById("dbFileFilter");
+      const prevSel = sel.value || "ALL";
+      sel.innerHTML = `<option value="ALL">Semua Modul (${totalFiles} File)</option>` +
+        entries.map(([fn, cnt]) => `<option value="${escapeHtml(fn)}">${escapeHtml(fn)} (${cnt})</option>`).join("");
+      if (Array.from(sel.options).some((o) => o.value === prevSel)) sel.value = prevSel;
+
+      // Daftar Modul di Upload Center
+      document.getElementById("uploadedFilesSummaryList").innerHTML = entries.map(([fn, cnt]) => {
+        const cat = detectModuleCategory(fn);
+        return `
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-2">
+            <div class="flex items-center justify-between gap-1">
+              <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${cat.color}">${cat.label}</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300">✅ AKTIF</span>
+            </div>
+            <div class="font-bold truncate" title="${escapeHtml(fn)}">📄 ${escapeHtml(fn)}</div>
+            <div class="flex items-center justify-between pt-1 border-t border-slate-200/70 dark:border-slate-800">
+              <span class="text-[11px] font-extrabold text-violet-600 dark:text-indigo-400">${cnt.toLocaleString("id-ID")} soal</span>
+              <button onclick="confirmDeleteModuleFile(decodeURIComponent('${encodeURIComponent(fn)}'))" class="text-[10px] font-bold text-rose-500 hover:underline">🗑️ Hapus</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      // Badges di Home
+      document.getElementById("homeModuleBadges").innerHTML = entries.map(([fn, cnt]) => {
+        const cat = detectModuleCategory(fn);
+        return `
+          <button onclick="filterDbByModule(decodeURIComponent('${encodeURIComponent(fn)}'))" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-violet-500 text-xs transition">
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold ${cat.color}">${cat.label}</span>
+            <span class="font-bold max-w-[160px] truncate">${escapeHtml(fn)}</span>
+            <span class="font-extrabold text-violet-600 dark:text-indigo-400">(${cnt.toLocaleString("id-ID")})</span>
+          </button>
+        `;
+      }).join("");
+
+      // Chips di Knowledge DB
+      const curFile = sel.value || "ALL";
+      document.getElementById("dbModuleChips").innerHTML =
+        `<button onclick="selectDbModuleChip('ALL')" class="px-2.5 py-1 rounded-lg text-[11px] font-extrabold ${curFile === "ALL" ? "bg-violet-600 text-white" : "bg-slate-100 dark:bg-slate-800"}">Semua (${totalRecs.toLocaleString("id-ID")})</button>` +
+        entries.map(([fn, cnt]) => {
+          const cat = detectModuleCategory(fn);
+          return `<button onclick="selectDbModuleChip(decodeURIComponent('${encodeURIComponent(fn)}'))" class="px-2.5 py-1 rounded-lg text-[11px] font-bold ${curFile === fn ? "bg-violet-600 text-white" : "bg-slate-100 dark:bg-slate-800"}">${cat.label}: ${escapeHtml(fn.replace(/\.xlsx?$/i, ""))} (${cnt})</button>`;
+        }).join("");
+
+      // Checklist 10 Modul Target
+      const lowerSet = new Set(entries.map(([fn]) => fn.toLowerCase().trim()));
+      let hitCount = 0;
+      document.getElementById("pendingModulesList").innerHTML = TARGET_MODULES.map((tm) => {
+        const ok = lowerSet.has(tm.file.toLowerCase().trim());
+        if (ok) hitCount++;
+        const matchEntry = entries.find(([k]) => k.toLowerCase().trim() === tm.file.toLowerCase().trim());
+        return `
+          <div class="p-2.5 rounded-xl border flex items-center justify-between gap-2 ${ok ? "bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800" : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800"}">
+            <div class="min-w-0">
+              <div class="text-[10px] font-extrabold ${ok ? "text-emerald-700 dark:text-emerald-400" : "text-amber-600"}">${tm.category}</div>
+              <div class="font-bold truncate" title="${escapeHtml(tm.file)}">${escapeHtml(tm.file)}</div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold shrink-0 ${ok ? "bg-emerald-600 text-white" : "bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300"}">${ok ? `✅ ${matchEntry[1]} soal` : "⏳ Belum"}</span>
+          </div>
+        `;
+      }).join("");
+      document.getElementById("pendingModulesBadge").textContent = `${hitCount} / ${TARGET_MODULES.length} Masuk`;
+    }
+
+    function filterDbByModule(fn) {
+      switchTab("database");
+      document.getElementById("dbFileFilter").value = fn;
+      updateAllStatsUI();
+      renderDatabaseTable(1);
+    }
+
+    function selectDbModuleChip(fn) {
+      document.getElementById("dbFileFilter").value = fn;
+      updateAllStatsUI();
+      renderDatabaseTable(1);
+    }
+
+    function onDbFileFilterChange() {
+      updateAllStatsUI();
+      renderDatabaseTable(1);
+    }
+
+    function debouncedDbSearch() {
+      clearTimeout(dbSearchTimer);
+      dbSearchTimer = setTimeout(() => renderDatabaseTable(1), 160);
+    }
+
+    function renderDatabaseTable(page = 1) {
+      dbPage = page;
+      const q = (document.getElementById("dbSearchInput")?.value || "").toLowerCase().trim();
+      const f = document.getElementById("dbFileFilter")?.value || "ALL";
+      let list = activeDB;
+      if (f !== "ALL") list = list.filter((r) => (r.file || "") === f);
+      if (q) list = list.filter((r) => r.q.toLowerCase().includes(q) || r.a.toLowerCase().includes(q) || (r.file || "").toLowerCase().includes(q));
+
+      const pageSize = 50;
+      const totalPages = Math.max(1, Math.ceil(list.length / pageSize));
+      if (dbPage > totalPages) dbPage = 1;
+      const slice = list.slice((dbPage - 1) * pageSize, dbPage * pageSize);
+
+      document.getElementById("dbListContainer").innerHTML = slice.length
+        ? slice.map((r) => {
+            const cat = detectModuleCategory(r.file);
+            return `
+              <div class="glass-card border rounded-2xl p-3.5 space-y-1.5 text-xs">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${cat.color}">${cat.label}</span>
+                  <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold">${escapeHtml(r.file)} • Row ${r.row}</span>
+                </div>
+                <div class="font-semibold text-slate-800 dark:text-slate-100">${escapeHtml(r.q)}</div>
+                <div class="font-bold text-emerald-600 dark:text-emerald-400">Jawaban: ${escapeHtml(r.a)}</div>
+              </div>
+            `;
+          }).join("")
+        : `<div class="p-6 text-center text-xs text-slate-400">Tidak ada soal ditemukan.</div>`;
+
+      document.getElementById("dbPaginationBar").innerHTML = `
+        <span>Menampilkan ${slice.length} dari ${list.length.toLocaleString("id-ID")} soal</span>
+        <div class="flex gap-1.5">
+          <button ${dbPage <= 1 ? "disabled" : ""} onclick="renderDatabaseTable(${dbPage - 1})" class="px-3 py-1 rounded-lg bg-slate-200 dark:bg-slate-800 disabled:opacity-40 font-bold">Prev</button>
+          <span class="px-2 py-1 font-bold">${dbPage} / ${totalPages}</span>
+          <button ${dbPage >= totalPages ? "disabled" : ""} onclick="renderDatabaseTable(${dbPage + 1})" class="px-3 py-1 rounded-lg bg-slate-200 dark:bg-slate-800 disabled:opacity-40 font-bold">Next</button>
+        </div>
+      `;
+    }
+
+    async function recordHistorySession(mode, total, exact, unmatched, preview) {
+      const item = {
+        id: "h_" + Date.now(),
+        date: new Date().toLocaleString("id-ID"),
+        mode, total, exact, unmatched,
+        preview: String(preview || "").slice(0, 100)
+      };
+      matchHistory.unshift(item);
+      matchHistory = matchHistory.slice(0, 60);
+      await idbPutChunked("history", [item], 10);
+      renderHistoryUI();
+      updateAllStatsUI();
+    }
+
+    function renderHistoryUI() {
+      const html = matchHistory.length
+        ? matchHistory.map((h) => `
+            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 text-xs">
+              <div class="min-w-0">
+                <div class="text-[10px] text-slate-500">${h.date} • ${h.mode}</div>
+                <div class="font-semibold truncate">${escapeHtml(h.preview)}</div>
+              </div>
+              <span class="font-extrabold text-emerald-600 shrink-0">${h.exact}/${h.total} Exact</span>
+            </div>
+          `).join("")
+        : `<div class="text-xs text-slate-400 p-3">Belum ada riwayat sesi.</div>`;
+      document.getElementById("historyListContainer").innerHTML = html;
+      document.getElementById("homeRecentActivities").innerHTML = matchHistory.slice(0, 4).length
+        ? matchHistory.slice(0, 4).map((h) => `<div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 flex justify-between"><span>${escapeHtml(h.preview)}</span><strong class="text-emerald-600">${h.exact}/${h.total}</strong></div>`).join("")
+        : `<div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900">Belum ada sesi Auto-Pilot atau Match Engine.</div>`;
+    }
+
+    async function clearHistoryAll() {
+      matchHistory = [];
+      await idbClear("history");
+      renderHistoryUI();
+      updateAllStatsUI();
+      showToast("Riwayat dibersihkan.");
+    }
+
+    function confirmDeleteModuleFile(fn) {
+      openConfirmModal("Hapus Modul?", `Seluruh soal dari "${fn}" akan dihapus dari database perangkat ini.`, async () => {
+        activeDB = activeDB.filter((r) => (r.file || "") !== fn);
+        rebuildFastIndex();
+        await idbClear("records");
+        await idbPutChunked("records", activeDB, 500);
+        renderDatabaseTable(1);
+        showToast(`🗑️ Modul "${fn}" dihapus.`);
+      });
+    }
+
+    function confirmResetDatabase() {
+      openConfirmModal("Reset Database?", "Semua modul tambahan akan dihapus dan dikembalikan ke 25 soal seed awal.", async () => {
+        activeDB = SEED_RECORDS.map((r) => ({ ...r }));
+        rebuildFastIndex();
+        await idbClear("records");
+        await idbPutChunked("records", activeDB, 500);
+        renderDatabaseTable(1);
+        showToast("Database direset ke 25 soal seed awal.");
+      });
+    }
+
+    /* =========================================================================
+       10. NAVIGATION, MODALS, SETUP CODE, PWA MANIFEST & BOOTSTRAP
+       ========================================================================= */
+    function renderNavMenus() {
+      const build = (mob) => MENUS.map((m) => `
+        <button data-tab="${m.id}" onclick="switchTab('${m.id}'); ${mob ? "closeMobileDrawer();" : ""}" class="nav-item w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-violet-50 dark:hover:bg-slate-800 transition truncate">
+          ${m.label}
+        </button>
+      `).join("");
+      document.getElementById("desktopSidebarNav").innerHTML = build(false);
+      document.getElementById("mobileSidebarNav").innerHTML = build(true);
+    }
+
+    function switchTab(id) {
+      document.querySelectorAll(".tab-pane").forEach((el) => el.classList.remove("active"));
+      document.getElementById("tab-" + id)?.classList.add("active");
+      document.querySelectorAll(".nav-item").forEach((btn) => {
+        const act = btn.dataset.tab === id;
+        btn.classList.toggle("btn-violet", act);
+        btn.classList.toggle("text-white", act);
+      });
+      if (id === "database") renderDatabaseTable(1);
+    }
+
+    function openMobileDrawer() {
+      document.getElementById("mobileDrawerBackdrop").classList.remove("hidden");
+      document.getElementById("mobileDrawer").classList.remove("-translate-x-full");
+    }
+    function closeMobileDrawer() {
+      document.getElementById("mobileDrawerBackdrop").classList.add("hidden");
+      document.getElementById("mobileDrawer").classList.add("-translate-x-full");
+    }
+
+    function toggleDarkMode() {
+      const h = document.documentElement;
+      const isDark = h.classList.toggle("dark");
+      h.classList.toggle("light", !isDark);
+    }
+
+    function openSetupModal() {
+      const m = document.getElementById("setupModal");
+      m.classList.remove("hidden"); m.classList.add("flex");
+    }
+    function closeSetupModal() {
+      const m = document.getElementById("setupModal");
+      m.classList.add("hidden"); m.classList.remove("flex");
+    }
+
+    function openConfirmModal(title, msg, cb) {
+      document.getElementById("confirmModalTitle").textContent = title;
+      document.getElementById("confirmModalMsg").textContent = msg;
+      confirmAction = cb;
+      const m = document.getElementById("confirmModal");
+      m.classList.remove("hidden"); m.classList.add("flex");
+    }
+    function closeConfirmModal() {
+      const m = document.getElementById("confirmModal");
+      m.classList.add("hidden"); m.classList.remove("flex");
+      confirmAction = null;
+    }
+    async function executeConfirmModal() {
+      const fn = confirmAction;
+      closeConfirmModal();
+      if (typeof fn === "function") await fn();
+    }
+
+    async function saveSettingsState() {
+      appSettings.autoRun = Boolean(document.getElementById("autoRunSwitch")?.checked);
+      appSettings.fuzzyThreshold = parseInt(document.getElementById("settingFuzzyThreshold")?.value || "72", 10);
+      appSettings.clickDelayMs = parseInt(document.getElementById("settingClickDelay")?.value || "120", 10);
+      await idbPutChunked("meta", [{ id: "app_settings", ...appSettings }], 5);
+    }
+
+    function populateSetupCodeBlocks() {
+      document.getElementById("setupVercelCode").textContent = JSON.stringify({
+        rewrites: [
+          { source: "/alfa", destination: "https://alfalearning.sat.co.id/" },
+          { source: "/alfa/:path*", destination: "https://alfalearning.sat.co.id/:path*" }
+        ]
+      }, null, 2);
+
+      document.getElementById("setupUserscriptCode").textContent = `// ==UserScript==
+// @name         JARVIS Auto-Pilot Bridge v4 (AlfaLearning)
+// @namespace    https://jarvis-humanoid.local/
+// @version      4.0
+// @match        https://alfalearning.sat.co.id/*
+// @grant        none
+// ==/UserScript==
+(function(){
+  'use strict';
+  let cachedDb = [], cfg = { threshold: 72, delayMs: 120 };
+  const norm = s => String(s||'').toLowerCase().replace(/^\\s*(question|soal|no\\.?)?\\s*\\d+[\\.\\)\\:\\-\\s]+/i,'').replace(/[^\\p{L}\\p{N}\\s]/gu,' ').replace(/\\s+/g,' ').trim();
+  const dice = (a,b) => { if(!a||!b) return 0; if(a===b) return 1; if(a.length<2||b.length<2) return 0; const m=new Map(); for(let i=0;i<a.length-1;i++){const g=a.slice(i,i+2);m.set(g,(m.get(g)||0)+1);} let inter=0; for(let i=0;i<b.length-1;i++){const g=b.slice(i,i+2);const c=m.get(g)||0;if(c>0){m.set(g,c-1);inter++;}} return (2*inter)/(a.length-1+b.length-1); };
+
+  function runPlay(db){
+    const boxes = Array.from(document.querySelectorAll('.que'));
+    const results = []; let exact=0, fuzzy=0, unmatched=0;
+    boxes.forEach((box, idx) => {
+      const qText = (box.querySelector('.qtext')?.innerText || '').trim();
+      if(!qText) return;
+      const nq = norm(qText);
+      const radios = Array.from(box.querySelectorAll('.answer input[type="radio"]'));
+      const options = radios.map((inp,i) => {
+        let txt = inp.id ? (box.querySelector('label[for="'+CSS.escape(inp.id)+'"]')?.innerText || '') : '';
+        if(!txt && inp.parentElement) txt = inp.parentElement.innerText || '';
+        return { text: txt.replace(/^[a-eA-E][\\.\\)]\\s*/,'').trim(), el: inp };
+      });
+      let best=null, bestScore=0;
+      for(const r of db){
+        const nr = norm(r.q);
+        if(nq === nr){ best=r; bestScore=100; break; }
+        let sc = Math.round(dice(nq,nr)*100);
+        if(sc > bestScore){ bestScore=sc; best=r; }
+      }
+      let hitOpt = null;
+      if(best && bestScore >= cfg.threshold){
+        const na = norm(best.a); let os=0;
+        for(const o of options){
+          const no = norm(o.text);
+          if(no === na){ hitOpt=o; os=100; break; }
+          let s = dice(na,no)*100;
+          if(na.length>2 && (no.includes(na)||na.includes(no))) s = Math.max(s,84);
+          if(s>os){ os=s; hitOpt=o; }
+        }
+        if(os < 58) hitOpt = null;
+      }
+      if(hitOpt){
+        const isEx = bestScore >= 98; if(isEx) exact++; else fuzzy++;
+        box.style.border = '2.5px solid ' + (isEx ? '#10b981' : '#f59e0b');
+        setTimeout(() => { hitOpt.el.click(); hitOpt.el.checked = true; }, idx * cfg.delayMs);
+      } else {
+        unmatched++; box.style.border = '2.5px solid #ef4444';
+      }
+      results.push({ number: idx+1, question: qText, options: options.map(o=>o.text), status: hitOpt ? (bestScore>=98?'EXACT':'FUZZY') : 'UNMATCHED', score: bestScore, answer: best?.a || null, source: best?.file || null });
+    });
+    window.parent.postMessage({ type:'JARVIS_PLAY_RESULT', results, summary:{ total:results.length, exact, fuzzy, unmatched } }, '*');
+  }
+
+  window.addEventListener('message', (e) => {
+    const d = e.data; if(!d || typeof d !== 'object') return;
+    if(d.type === 'JARVIS_EXECUTE_PLAY'){ cachedDb = d.db || cachedDb; cfg.threshold = d.threshold || 72; cfg.delayMs = d.delayMs ?? 120; runPlay(cachedDb); }
+    if(d.type === 'JARVIS_COPY_QUESTIONS'){
+      const txt = Array.from(document.querySelectorAll('.qtext')).map((el,i)=>(i+1)+'. '+el.innerText.trim()).join('\\n\\n');
+      window.parent.postMessage({ type:'JARVIS_QUESTIONS_COPIED', text: txt }, '*');
+    }
+  });
+  window.parent.postMessage({ type:'JARVIS_BRIDGE_READY', url: location.href }, '*');
+})();`;
+    }
+
+    function setupAutoPwaManifest() {
+      try {
+        const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#6366f1"/><path d="M278 96L128 282h112l-16 134 150-186H262l16-134z" fill="#fff"/></svg>';
+        const icon = "data:image/svg+xml;base64," + btoa(svg);
+        const manifest = { name: "JARVIS THE HUMANOID", short_name: "JARVIS", start_url: ".", display: "standalone", background_color: "#050a18", theme_color: "#6366f1", icons: [{ src: icon, sizes: "512x512", type: "image/svg+xml" }] };
+        const link = document.createElement("link");
+        link.rel = "manifest";
+        link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" }));
+        document.head.appendChild(link);
+      } catch {}
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      renderNavMenus();
+      setupAutoPwaManifest();
+      populateSetupCodeBlocks();
+      switchTab("browser");
+      setBrowserMode("direct");
+
+      // Load permanent local IndexedDB
+      const [localRecs, localHist, metaItems] = await Promise.all([
+        idbGetAll("records"),
+        idbGetAll("history"),
+        idbGetAll("meta")
+      ]);
+
+      const savedSettings = metaItems.find((m) => m.id === "app_settings");
+      if (savedSettings) {
+        Object.assign(appSettings, savedSettings);
+        document.getElementById("autoRunSwitch").checked = appSettings.autoRun;
+        document.getElementById("settingFuzzyThreshold").value = appSettings.fuzzyThreshold;
+        document.getElementById("settingClickDelay").value = appSettings.clickDelayMs;
+        document.getElementById("aiAutoSuggestToggle").checked = appSettings.aiAutoSuggest;
+        document.getElementById("geminiApiKeyInput").value = appSettings.geminiApiKey || "";
+      }
+
+      const ghCfg = metaItems.find((m) => m.id === "github_sync_cfg");
+      if (ghCfg) {
+        if (ghCfg.repo) document.getElementById("ghRepoInput").value = ghCfg.repo;
+        if (ghCfg.token) document.getElementById("ghTokenInput").value = ghCfg.token;
+      }
+
+      matchHistory = localHist.sort((a, b) => (b.id || "").localeCompare(a.id || ""));
+      renderHistoryUI();
+
+      // Merge Seed + Local Permanent Records
+      const seenIds = new Set();
+      activeDB = [];
+      for (const r of [...SEED_RECORDS, ...localRecs]) {
+        if (r.q && r.a && !seenIds.has(r.id)) {
+          seenIds.add(r.id);
+          activeDB.push(r);
+        }
+      }
+      rebuildFastIndex();
+      await idbPutChunked("records", activeDB, 500);
+      await autoLoadRepoMasterDb();
+      renderDatabaseTable(1);
+    });
+  </script>
+</body>
 </html>
